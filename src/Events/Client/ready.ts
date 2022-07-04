@@ -1,6 +1,6 @@
-const { Client } = require('discord.js')
+import { Client } from 'discord.js';
 
-module.exports = {
+export default {
     name: "ready",
     once: true,
 
@@ -9,6 +9,6 @@ module.exports = {
      */
     execute(client) {
         console.log("The client is now ready!");
-        client.user.setActivity('Hello!', {type: "WATCHING"})
+        client.user.setActivity('POKEMON!', {type: "WATCHING"})
     }
 }
