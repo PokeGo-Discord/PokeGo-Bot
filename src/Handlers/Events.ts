@@ -2,14 +2,9 @@ import { Events } from '../Validation/EventNames';
 import { promisify } from 'util';
 import { glob } from 'glob';
 import Ascii from 'ascii-table';
+import { Event } from '../Typings/Event';
 
 const globPromise = promisify(glob);
-
-export interface Event {
-    name: string;
-    once: boolean;
-    execute: any
-}
 
 module.exports = async (client) => {
     const Table = new Ascii("Events Loaded");
