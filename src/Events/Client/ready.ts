@@ -13,9 +13,11 @@ export default {
         console.log("The client is now ready!\n");
         client.user.setActivity('POKEMON!', {type: "WATCHING"})
 
+        // create and delete guilds that were added or deleted when the bot was offline
         createGuildDataOfflined(client)
         deleteGuildDataOfflined(client)
 
+        // TODO: Make a function "main" for this and make editable variable for the Interval time
         setInterval(() => {
             pokemon.SpawningPokemon();
         }, 120 * 1000)
