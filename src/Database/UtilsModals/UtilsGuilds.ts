@@ -63,11 +63,6 @@ export const getGuildLastSpawnDate = async (guildId: string): Promise<Date> => {
     return guildData.lastSpawnDate;
 }
 
-export const getGuildMessageCooldown = async (guildId: string) => {
-    const guildData = await guildsModal.findOne({ guildId });
-    return guildData.messageCooldown;
-}
-
 /**
  * Create all document for each guild that have been added when the bot was offline
  * @param guildId 

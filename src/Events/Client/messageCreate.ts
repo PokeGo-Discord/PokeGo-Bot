@@ -1,6 +1,5 @@
 import { Client, Message } from 'discord.js';
 import * as guildData from '../../Database/UtilsModals/UtilsGuilds'
-import { getGuildMessageCooldown } from '../../Database/UtilsModals/UtilsGuilds';
 import { isSpamming } from '../../Helpers/utils';
 
 const cooldown_users: Record<string, number> = {};
