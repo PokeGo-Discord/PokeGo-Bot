@@ -50,7 +50,7 @@ export async function isGuildActive(guildId: string): Promise<boolean> {
     let lastMessageDate = await getGuildLastMessageDate(guildId);
     let actualDate: number = Date.now();
 
-    if(actualDate - lastMessageDate < 5000 && message_count[guildId] >= 8) { // 2min
+    if(actualDate - lastMessageDate > 2 * 60000 && message_count[guildId] >= 8) { // 2min
         message_count[guildId] = 0;
     }
 
@@ -66,7 +66,7 @@ export async function isGuildActive(guildId: string): Promise<boolean> {
 export async function isSpawnDate(guildId: string): Promise<boolean> {
     let actualDate: number = Date.now();
     let LastSpawnDate: number = await getGuildLastSpawnDate(guildId);
-    if(actualDate - LastSpawnDate < 5000) // 10min
+    if(actualDate - LastSpawnDate < 10 * 60000) // 10min
         return false;
     return true
 }
