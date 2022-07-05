@@ -1,5 +1,6 @@
 import { Client, Guild } from "discord.js";
 import guildsModal, { Guilds } from "../Modals/guildsModal";
+import { DebugLog } from "../../Helpers/utils";
 
 /**
  * Check if a guild exist by the guild ID
@@ -23,9 +24,10 @@ export const createGuildData = async (guildId: string): Promise<void> => {
     const guildData = 
         await guildsModal.create({
             guildId: guildId,
-            spawnRemaining: Date.now(),
+            lastSpawnDate: Date.now(),
     });
     guildData.save();
+    DebugLog("✅ a guilds have been added")
 };
 
 /**
@@ -38,6 +40,7 @@ export const deleteGuildData = async (guildId: string): Promise<void> => {
     if(!guildData) return
 
     guildData.deleteOne()
+    DebugLog("❌ a guilds have been deleted")
 }
 
 /**
@@ -51,13 +54,18 @@ export const getGuildData = async (guildId: string): Promise<Guilds> => {
 };
 
 /**
- * Return the remaining spawn time by the guild ID
+ * Return the last spawn date by the guild ID
  * @param guildId 
  * @returns return a Date as promise
  */
-export const getGuildSpawnRemaining = async (guildId: string): Promise<Date> => {
+export const getGuildLastSpawnDate = async (guildId: string): Promise<Date> => {
     const guildData = await guildsModal.findOne({ guildId });
-    return guildData.spawnRemaining
+    return guildData.lastSpawnDate;
+}
+
+export const getGuildMessageCooldown = async (guildId: string) => {
+    const guildData = await guildsModal.findOne({ guildId });
+    return guildData.messageCooldown;
 }
 
 /**

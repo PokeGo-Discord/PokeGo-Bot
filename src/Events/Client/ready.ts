@@ -1,7 +1,10 @@
-import { Client } from 'discord.js';
+import { Client, Guild } from 'discord.js';
 import * as pokemon from '../../Helpers/pokemon';
 import { createGuildDataOfflined, deleteGuildDataOfflined } from '../../Database/UtilsModals/UtilsGuilds';
-import { insertDataInExistingDoc } from '../../Helpers/mongo';
+import { fetchAllGuild } from '../../Helpers/utils';
+import { updateKeyInExistingDoc, insertDataInExistingDoc } from '../../Helpers/mongo';
+
+
 
 export default {
     name: "ready",
@@ -10,7 +13,7 @@ export default {
     /**
      * @param {Client} client
      */
-    execute(client) {
+    execute(client: Client) {
         console.log("The client is now ready!\n");
         client.user.setActivity('POKEMON!', {type: "WATCHING"})
 
@@ -18,12 +21,23 @@ export default {
         createGuildDataOfflined(client)
         deleteGuildDataOfflined(client)
 
-        insertDataInExistingDoc("guilds", {test: "Success"})
+        /* Delete key 'test' of all docs from guilds collection
+        deleteDataInExistingDoc('guilds', { test: "" }) */
+
+        /* Insert data to all document of all docs from guilds collection
+        insertDataInExistingDoc('guilds', {'messageCooldown': Date.now()}) */
+
+        /* Update the key 'spawnRemaining' to 'lastSpawnDate' of all docs from guilds collection
+        updateKeyInExistingDoc('guilds', {'spawnRemaining': 'lastSpawnDate'}) */
 
         // TODO: Make a function "main" for this and make editable variable for the Interval time
         setInterval(() => {
-            pokemon.SpawningPokemon();
-        }, 120 * 1000)
+            fetchAllGuild(client).forEach(guild => {
+                if(pokemon.isSpawnable(guild.id))
+                    pokemon.SpawningPokemon();
+                else
+                    return;
+            })
+        }, 1 * 500)
     }
 }
-
