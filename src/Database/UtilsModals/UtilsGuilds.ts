@@ -25,6 +25,7 @@ export const createGuildData = async (guildId: string): Promise<void> => {
         await guildsModal.create({
             guildId: guildId,
             lastSpawnDate: Date.now(),
+            lastMessageDate: Date.now(),
     });
     guildData.save();
     DebugLog("✅ a guilds have been added")
@@ -63,9 +64,33 @@ export const getGuildLastSpawnDate = async (guildId: string): Promise<number> =>
     return guildData.lastSpawnDate;
 }
 
+/**
+ * Update the lastSpawnDate by the guild ID
+ * @param guildId 
+ */
 export const updateGuildLastSpawnDate = async (guildId: string): Promise<void> => {
     const guildData = await guildsModal.findOne({ guildId });
     guildData.lastSpawnDate = Date.now();
+    guildData.save();
+}
+
+/**
+ *  Return the last message date by the guild Id
+ * @param guildId 
+ * @returns 
+ */
+export const getGuildLastMessageDate = async (guildId: string): Promise<number> => {
+    const guildData = await guildsModal.findOne({ guildId });
+    return guildData.lastMessageDate;
+}
+
+/**
+ * Update the lastMessageDate by the guild Id
+ * @param guildId 
+ */
+export const updateGuildLastMessageDate = async (guildId: string): Promise<void> => {
+    const guildData = await guildsModal.findOne({ guildId });
+    guildData.lastMessageDate = Date.now();
     guildData.save();
 }
 
@@ -84,7 +109,6 @@ export const createGuildDataOfflined = async (client: Client): Promise<void> => 
         else {
             createGuildData(id);
             inc++
-            console.log(inc + " ✅ new guilds which have been added when the bot was offline, updating database...");
         }
     });
 }
@@ -104,7 +128,6 @@ export const createGuildDataOfflined = async (client: Client): Promise<void> => 
         else {
             deleteGuildData(id);
             inc++
-            console.log(inc + " ❌ deleted guilds which have been remove when the bot was offline, updating database...");
         }
     });
 }

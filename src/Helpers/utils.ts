@@ -1,5 +1,5 @@
 import { Guild } from "discord.js";
-import { getGuildLastSpawnDate } from "../Database/UtilsModals/UtilsGuilds";
+import { getGuildLastMessageDate, getGuildLastSpawnDate } from "../Database/UtilsModals/UtilsGuilds";
 import { message_count } from "../Events/Client/messageCreate";
 
 /**
@@ -46,7 +46,14 @@ export function updateCooldownUser(currentTime: number, cooldown_users: Record<s
  * @param guildId 
  * @returns boolean
  */
-export function isGuildActive(guildId: string): boolean {
+export async function isGuildActive(guildId: string): Promise<boolean> {
+    let lastMessageDate = await getGuildLastMessageDate(guildId);
+    let actualDate: number = Date.now();
+
+    if(actualDate - lastMessageDate < 5000 && message_count[guildId] >= 8) { // 2min
+        message_count[guildId] = 0;
+    }
+
     if(message_count[guildId] >= 8) return true
     return false;
 }
@@ -59,7 +66,7 @@ export function isGuildActive(guildId: string): boolean {
 export async function isSpawnDate(guildId: string): Promise<boolean> {
     let actualDate: number = Date.now();
     let LastSpawnDate: number = await getGuildLastSpawnDate(guildId);
-    if(actualDate - LastSpawnDate < 600000) // 10min
+    if(actualDate - LastSpawnDate < 5000) // 10min
         return false;
     return true
 }

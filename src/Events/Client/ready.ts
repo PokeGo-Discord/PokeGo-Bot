@@ -25,7 +25,7 @@ export default {
         deleteDataInExistingDoc('guilds', { messageCooldown: "" }) */
 
         /* Insert data to all document of all docs from guilds collection
-        insertDataInExistingDoc('guilds', {'lastSpawnDate': Date.now()})*/
+        insertDataInExistingDoc('guilds', {'lastMessageDate': Date.now()})*/
 
         /* Update the key 'spawnRemaining' to 'lastSpawnDate' of all docs from guilds collection
         updateKeyInExistingDoc('guilds', {'spawnRemaining': 'lastSpawnDate'}) */
