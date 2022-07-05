@@ -1,8 +1,8 @@
 import { Client, Guild } from 'discord.js';
 import * as pokemon from '../../Helpers/pokemon';
 import { createGuildDataOfflined, deleteGuildDataOfflined } from '../../Database/UtilsModals/UtilsGuilds';
-import { fetchAllGuild } from '../../Helpers/utils';
-import { updateKeyInExistingDoc, insertDataInExistingDoc } from '../../Helpers/mongo';
+import { fetchAllGuild, isGuildActive } from '../../Helpers/utils';
+import { updateKeyInExistingDoc, insertDataInExistingDoc, deleteDataInExistingDoc } from '../../Helpers/mongo';
 
 
 
@@ -22,7 +22,7 @@ export default {
         deleteGuildDataOfflined(client)
 
         /* Delete key 'test' of all docs from guilds collection
-        deleteDataInExistingDoc('guilds', { test: "" }) */
+        deleteDataInExistingDoc('guilds', { messageCooldown: "" }) */
 
         /* Insert data to all document of all docs from guilds collection
         insertDataInExistingDoc('guilds', {'messageCooldown': Date.now()}) */
@@ -33,11 +33,13 @@ export default {
         // TODO: Make a function "main" for this and make editable variable for the Interval time
         setInterval(() => {
             fetchAllGuild(client).forEach(guild => {
-                if(pokemon.isSpawnable(guild.id))
-                    pokemon.SpawningPokemon();
-                else
-                    return;
+                pokemon.isSpawnable(guild.id).then((bool) => {
+                    if(!bool) return
+                    pokemon.SpawningPokemon(guild.id);
+                })
+
+                return;
             })
-        }, 1 * 500)
+        }, 1 * 5000)
     }
 }

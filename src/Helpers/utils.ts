@@ -1,4 +1,5 @@
 import { Guild, Message } from "discord.js";
+import { message_count } from "../Events/Client/messageCreate";
 
 /**
  * Return an Array of Guild
@@ -17,13 +18,13 @@ export function fetchAllGuild(client): Array<Guild> {
  * @param message 
  * @returns boolean
  */
-export function isSpamming(currentTime: number, cooldown_users: Record<string, number>, message: Message): boolean {
-    if(currentTime - (cooldown_users[message.author.id] ? cooldown_users[message.author.id] : 0) < 1500) {
+export function isSpamming(currentTime: number, cooldown_users: Record<string, number>, authorId: string): boolean {
+    if(currentTime - (cooldown_users[authorId] ? cooldown_users[authorId] : 0) < 1500) {
         console.log("SPAM");
         return true;
     }
 
-    updateCooldownUser(currentTime, cooldown_users, message);
+    updateCooldownUser(currentTime, cooldown_users, authorId);
     return false;
 }
 
@@ -34,8 +35,8 @@ export function isSpamming(currentTime: number, cooldown_users: Record<string, n
  * @param message 
  * @returns Record of string, number
  */
-export function updateCooldownUser(currentTime: number, cooldown_users: Record<string, number>, message: Message): Record<string, number> {
-    cooldown_users[message.author.id] = currentTime;
+export function updateCooldownUser(currentTime: number, cooldown_users: Record<string, number>, authorId: string): Record<string, number> {
+    cooldown_users[authorId] = currentTime;
     return cooldown_users;
 }
 
@@ -45,8 +46,8 @@ export function updateCooldownUser(currentTime: number, cooldown_users: Record<s
  * @returns boolean
  */
 export function isGuildActive(guildId: string): boolean {
-    // TODO: Detecte if the guild is active or not then return true if is active, and false if is inactive.
-    return true
+    if(message_count[guildId] >= 8) return true
+    return false;
 }
 
 /**

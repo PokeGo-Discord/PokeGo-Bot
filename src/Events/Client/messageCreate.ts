@@ -2,7 +2,8 @@ import { Client, Message } from 'discord.js';
 import * as guildData from '../../Database/UtilsModals/UtilsGuilds'
 import { isSpamming } from '../../Helpers/utils';
 
-const cooldown_users: Record<string, number> = {};
+export const cooldown_users: Record<string, number> = {};
+export const message_count: Record<string, number> = {};
 
 export default {
     name: "messageCreate",
@@ -13,13 +14,15 @@ export default {
      * @param {Client} client
      */
     execute(message: Message, client: Client) {
-        if(message.author.bot) return;                                                                    
+        if(message.author.bot || !message.guildId) return;                                                                    
         
         let currentTime = Date.now();
 
-        // Detect sppam
-        if(isSpamming(currentTime, cooldown_users, message))
+        // Detect spam
+        if(isSpamming(currentTime, cooldown_users, message.author.id))
             return
+
+        message_count[message.guildId] = (message_count[message.guildId] ? message_count[message.guildId] : 0) + 1;
 
         console.log(cooldown_users);
     }
