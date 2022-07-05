@@ -1,6 +1,10 @@
 import { Guild } from "discord.js";
 import { getGuildLastMessageDate, getGuildLastSpawnDate } from "../Database/UtilsModals/UtilsGuilds";
 import { message_count } from "../Events/Client/messageCreate";
+import { Config } from "../Typings/config";
+const config: Config = require('../config.json');
+
+// TODO: make config variable configurable per each guild (DATABASE)
 
 /**
  * Return an Array of Guild
@@ -20,8 +24,7 @@ export function fetchAllGuild(client): Array<Guild> {
  * @returns boolean
  */
 export function isSpamming(currentTime: number, cooldown_users: Record<string, number>, authorId: string): boolean {
-    if(currentTime - (cooldown_users[authorId] ? cooldown_users[authorId] : 0) < 1500) {
-        console.log("SPAM");
+    if(currentTime - (cooldown_users[authorId] ? cooldown_users[authorId] : 0) < config.spamTimeThreshold * 1000) {
         return true;
     }
 
@@ -50,11 +53,11 @@ export async function isGuildActive(guildId: string): Promise<boolean> {
     let lastMessageDate = await getGuildLastMessageDate(guildId);
     let actualDate: number = Date.now();
 
-    if(actualDate - lastMessageDate > 2 * 60000 && message_count[guildId] >= 8) { // 2min
+    if(actualDate - lastMessageDate > config.timeBetweenMessage * 60000 && message_count[guildId] >= config.messageCountNeeded) { // 2min
         message_count[guildId] = 0;
     }
 
-    if(message_count[guildId] >= 8) return true
+    if(message_count[guildId] >= config.messageCountNeeded) return true
     return false;
 }
 
@@ -66,7 +69,7 @@ export async function isGuildActive(guildId: string): Promise<boolean> {
 export async function isSpawnDate(guildId: string): Promise<boolean> {
     let actualDate: number = Date.now();
     let LastSpawnDate: number = await getGuildLastSpawnDate(guildId);
-    if(actualDate - LastSpawnDate < 10 * 60000) // 10min
+    if(actualDate - LastSpawnDate < config.timeBetweenSpawn * 60000) // 10min
         return false;
     return true
 }

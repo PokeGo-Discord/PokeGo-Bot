@@ -3,8 +3,10 @@ import * as pokemon from '../../Helpers/pokemon';
 import { createGuildDataOfflined, deleteGuildDataOfflined } from '../../Database/UtilsModals/UtilsGuilds';
 import { fetchAllGuild } from '../../Helpers/utils';
 import { updateKeyInExistingDoc, insertDataInExistingDoc, deleteDataInExistingDoc } from '../../Helpers/mongo';
+import { Config } from '../../Typings/config';
+const config: Config = require('../../config.json');
 
-
+// TODO: make config variable configurable per each guild (DATABASE)
 
 export default {
     name: "ready",
@@ -40,6 +42,6 @@ export default {
 
                 return;
             })
-        }, 5000) // Each 2min
+        }, config.readyCooldown * 60000) // Each 2min
     }
 }

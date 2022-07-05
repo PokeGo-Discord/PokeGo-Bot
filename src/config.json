@@ -1,0 +1,7 @@
+{
+    "readyCooldown": 2,
+    "timeBetweenSpawn": 10,
+    "timeBetweenMessage": 2,
+    "spamTimeThreshold": 1.5,
+    "messageCountNeeded": 10
+}
