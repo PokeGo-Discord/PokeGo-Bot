@@ -1,4 +1,5 @@
-import { Guild, Message } from "discord.js";
+import { Guild } from "discord.js";
+import { getGuildLastSpawnDate } from "../Database/UtilsModals/UtilsGuilds";
 import { message_count } from "../Events/Client/messageCreate";
 
 /**
@@ -53,13 +54,20 @@ export function isGuildActive(guildId: string): boolean {
 /**
  * Detect is the last spawn date is to far of the actual date.
  * @param guildId 
- * @returns boolean
+ * @returns Promise boolean
  */
-export function isSpawnDate(guildId: string): boolean {
-    // TODO: Detect is the last spawn date is to far of the actual date. Return true if is to far, or return false.
+export async function isSpawnDate(guildId: string): Promise<boolean> {
+    let actualDate: number = Date.now();
+    let LastSpawnDate: number = await getGuildLastSpawnDate(guildId);
+    if(actualDate - LastSpawnDate < 600000) // 10min
+        return false;
     return true
 }
 
+/**
+ * Sen a console.log only when the debug environment is ON
+ * @param log 
+ */
 export function DebugLog(log: string): void {
     if(process.env.environment === 'debug')
         console.log("DEBUG: " + log + "\n")

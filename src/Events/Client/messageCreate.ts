@@ -1,5 +1,4 @@
 import { Client, Message } from 'discord.js';
-import * as guildData from '../../Database/UtilsModals/UtilsGuilds'
 import { isSpamming } from '../../Helpers/utils';
 
 export const cooldown_users: Record<string, number> = {};
@@ -22,6 +21,7 @@ export default {
         if(isSpamming(currentTime, cooldown_users, message.author.id))
             return
 
+        // Guild activity
         message_count[message.guildId] = (message_count[message.guildId] ? message_count[message.guildId] : 0) + 1;
 
         console.log(cooldown_users);

@@ -1,4 +1,4 @@
-import { Client, Guild } from "discord.js";
+import { Client } from "discord.js";
 import guildsModal, { Guilds } from "../Modals/guildsModal";
 import { DebugLog } from "../../Helpers/utils";
 
@@ -58,9 +58,15 @@ export const getGuildData = async (guildId: string): Promise<Guilds> => {
  * @param guildId 
  * @returns return a Date as promise
  */
-export const getGuildLastSpawnDate = async (guildId: string): Promise<Date> => {
+export const getGuildLastSpawnDate = async (guildId: string): Promise<number> => {
     const guildData = await guildsModal.findOne({ guildId });
     return guildData.lastSpawnDate;
+}
+
+export const updateGuildLastSpawnDate = async (guildId: string): Promise<void> => {
+    const guildData = await guildsModal.findOne({ guildId });
+    guildData.lastSpawnDate = Date.now();
+    guildData.save();
 }
 
 /**

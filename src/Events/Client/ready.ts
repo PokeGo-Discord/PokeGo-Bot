@@ -1,7 +1,7 @@
-import { Client, Guild } from 'discord.js';
+import { Client } from 'discord.js';
 import * as pokemon from '../../Helpers/pokemon';
 import { createGuildDataOfflined, deleteGuildDataOfflined } from '../../Database/UtilsModals/UtilsGuilds';
-import { fetchAllGuild, isGuildActive } from '../../Helpers/utils';
+import { fetchAllGuild } from '../../Helpers/utils';
 import { updateKeyInExistingDoc, insertDataInExistingDoc, deleteDataInExistingDoc } from '../../Helpers/mongo';
 
 
@@ -25,7 +25,7 @@ export default {
         deleteDataInExistingDoc('guilds', { messageCooldown: "" }) */
 
         /* Insert data to all document of all docs from guilds collection
-        insertDataInExistingDoc('guilds', {'messageCooldown': Date.now()}) */
+        insertDataInExistingDoc('guilds', {'lastSpawnDate': Date.now()})*/
 
         /* Update the key 'spawnRemaining' to 'lastSpawnDate' of all docs from guilds collection
         updateKeyInExistingDoc('guilds', {'spawnRemaining': 'lastSpawnDate'}) */
@@ -40,6 +40,6 @@ export default {
 
                 return;
             })
-        }, 1 * 5000)
+        }, 5000) // Each 2min
     }
 }

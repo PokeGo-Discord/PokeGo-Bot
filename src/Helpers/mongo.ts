@@ -1,7 +1,4 @@
 import mongoose, { Model, model } from 'mongoose';
-import { Interface } from 'readline';
-import { TextEncoderStream } from 'stream/web';
-import { Guilds } from '../Database/Modals/guildsModal';
 
 /**
  * Database connection

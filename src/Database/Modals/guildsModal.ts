@@ -1,14 +1,13 @@
-import { timeStamp } from "console";
-import { Document, model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
 
 export interface Guilds {
   guildId: string;
-  lastSpawnDate: Date;
+  lastSpawnDate: number;
 }
 
 export const Guilds = new Schema({
   guildId: String,
-  lastSpawnDate: Date,
+  lastSpawnDate: Number,
 });
 
 export default model<Guilds>("Guilds", Guilds);
