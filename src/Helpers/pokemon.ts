@@ -1,13 +1,12 @@
 import { isSpawnDate, isGuildActive } from "./utils";
 import { message_count } from "../Events/Client/messageCreate";
 import { updateGuildLastSpawnDate } from "../Database/UtilsModals/UtilsGuilds";
-import fetch from 'node-fetch';
-import { stat } from "fs";
+import { STATS_NAME } from "./constants";
+import fetch from "node-fetch";
 
-export interface StatsInterface {
-    
-}
-
+/**
+ * Class Pokemon
+ */
 export class Pokemon {
     owner_id: string;
     owner_name: string
@@ -18,46 +17,56 @@ export class Pokemon {
     stats: Record<string, number>
     shiny: boolean;
 
-    async initPokemon() {
+    /**
+     * Init the pokemon, generate ivs / Stats / name / level and everything that needed for a pokemon
+     */
+    async initPokemon(): Promise<void> {
         this.name = 'clefairy';
         this.level = 50
 
-        await this.initIv().then((res) => {
+        await this.initIvs().then((res) => {
             this.ivs = res ;
         });
 
         await this.getBaseStats(this.name).then(async (baseStats: Record<string, number>) => {
-            await this.initStats(baseStats).then((stats) => {
+            await this.updateStats(baseStats).then((stats) => {
                 this.stats = stats;
             })
         });
     }
 
-    async initIv() {
+    /**
+     * Initialise ivs of the pokemon
+     * @returns ivs as object
+     */
+    async initIvs(): Promise<Record<string,number>> {
         let ivs: Record<string, number> = {}
-        ivs['hp'] = 5;
-        ivs['atk'] = 5;
-        ivs['def'] = 5;
-        ivs['satk'] = 5;
-        ivs['sdef'] = 5;
-        ivs['spd'] = 5;
+        for(let i = 0; i < STATS_NAME.length; i++)
+          ivs[STATS_NAME[i]] = 5;
         
         return ivs;
     }
 
-    async initStats(baseStats: Record<string, number>) {
+    /**
+     * Update stats of the pokemon
+     * @param baseStats 
+     * @returns stats object
+     */
+    async updateStats(baseStats: Record<string, number>): Promise<Record<string, number>> {
         let stats: Record<string, number> = {}
-        stats['hp'] = this.calc_stat(baseStats, 'hp')
-        stats['atk'] = this.calc_stat(baseStats, 'atk')
-        stats['def'] = this.calc_stat(baseStats, 'def')
-        stats['satk'] = this.calc_stat(baseStats, 'satk')
-        stats['sdef'] = this.calc_stat(baseStats, 'sdef')
-        stats['spd'] = this.calc_stat(baseStats, 'spd')
+        for(let i = 0; i < STATS_NAME.length; i++)
+          stats[STATS_NAME[i]] = this.calc_stat(baseStats, STATS_NAME[i])
 
         return stats
     }
 
-    async getBaseStats(pokemonName: string) {
+    /**
+     * TODO: Stop fetching base stats with api and use constants that store all basestats of a pokemon
+     * Get base stats of a pokemon by his name
+     * @param pokemonName 
+     * @returns object
+     */
+    private async getBaseStats(pokemonName: string): Promise<string | Record<string, number>> {
         try {
             // 👇️ const response: Response
             const response = await fetch('https://pokeapi.co/api/v2/pokemon/' + pokemonName, {
@@ -75,12 +84,8 @@ export class Pokemon {
             const result = await response.json();
             
             let baseStats: Record<string, number> = {}
-            baseStats['hp'] = +(JSON.stringify(result['stats'][0]['base_stat']))
-            baseStats['atk'] = +(JSON.stringify(result['stats'][1]['base_stat']))
-            baseStats['def'] = +(JSON.stringify(result['stats'][2]['base_stat']))
-            baseStats['satk'] = +(JSON.stringify(result['stats'][3]['base_stat']))
-            baseStats['sdef'] = +(JSON.stringify(result['stats'][4]['base_stat']))
-            baseStats['spd'] = +(JSON.stringify(result['stats'][5]['base_stat']))
+            for(let i = 0; i < STATS_NAME.length; i++)
+              baseStats[STATS_NAME[i]] = +(JSON.stringify(result['stats'][i]['base_stat']))
         
             return baseStats;
           } catch (error) {
@@ -94,8 +99,13 @@ export class Pokemon {
           }
     }
 
-    calc_stat(baseStats: Record<string, number>, key: string) {
-        console.log(key);
+    /**
+     * Calcule les stats du pokemon
+     * @param baseStats 
+     * @param key ex: 'atk'
+     * @returns number
+     */
+    private calc_stat(baseStats: Record<string, number>, key: string): number {
         return Math.floor(
             (((this.ivs[key] + 2 * baseStats[key]) * this.level / 100) + 5)
         )
