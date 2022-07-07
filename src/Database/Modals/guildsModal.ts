@@ -1,15 +1,15 @@
-import { model, Schema } from "mongoose";
+import { model, Schema } from 'mongoose'
 
 export interface Guilds {
-  guildId: string;
-  lastSpawnDate: number;
-  lastMessageDate: number;
+    guildId: string
+    lastSpawnDate: number
+    lastMessageDate: number
 }
 
 export const Guilds = new Schema({
-  guildId: String,
-  lastSpawnDate: Number,
-  lastMessageDate: Number,
-});
+    guildId: String,
+    lastSpawnDate: Number,
+    lastMessageDate: Number,
+})
 
-export default model<Guilds>("Guilds", Guilds);
+export default model<Guilds>('Guilds', Guilds)

@@ -1,5 +1,5 @@
 export interface Event {
-    name: string;
-    once: boolean;
+    name: string
+    once: boolean
     execute: any
 }

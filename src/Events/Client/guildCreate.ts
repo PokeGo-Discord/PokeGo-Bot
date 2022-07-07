@@ -1,8 +1,8 @@
-import { Guild } from 'discord.js';
+import { Guild } from 'discord.js'
 import * as guildData from '../../Database/UtilsModals/UtilsGuilds'
 
 export default {
-    name: "guildCreate",
+    name: 'guildCreate',
     once: false,
 
     /**
@@ -10,11 +10,9 @@ export default {
      */
     execute(guild) {
         guildData.isGuildExist(guild.id).then((isExist: boolean) => {
-            if(isExist) return
+            if (isExist) return
 
-            guildData.createGuildData(guild.id);
-
+            guildData.createGuildData(guild.id)
         })
-    }
+    },
 }
-

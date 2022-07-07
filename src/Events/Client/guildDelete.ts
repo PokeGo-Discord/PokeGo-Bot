@@ -1,15 +1,14 @@
-import { Guild } from 'discord.js';
+import { Guild } from 'discord.js'
 import * as guildData from '../../Database/UtilsModals/UtilsGuilds'
 
 export default {
-    name: "guildDelete",
+    name: 'guildDelete',
     once: false,
 
     /**
      * @param {Guild} guild
      */
     execute(guild) {
-        guildData.deleteGuildData(guild.id);
-    }
+        guildData.deleteGuildData(guild.id)
+    },
 }
-

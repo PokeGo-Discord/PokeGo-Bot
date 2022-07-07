@@ -1,23 +1,30 @@
-import { Client } from 'discord.js';
-import * as pokemon from '../../Helpers/pokemon';
-import { createGuildDataOfflined, deleteGuildDataOfflined } from '../../Database/UtilsModals/UtilsGuilds';
-import { fetchAllGuild } from '../../Helpers/utils';
-import { updateKeyInExistingDoc, insertDataInExistingDoc, deleteDataInExistingDoc } from '../../Helpers/mongo';
-import { Config } from '../../Typings/config';
-const config: Config = require('../../config.json');
+import { Client } from 'discord.js'
+import * as pokemon from '../../Helpers/pokemon'
+import {
+    createGuildDataOfflined,
+    deleteGuildDataOfflined,
+} from '../../Database/UtilsModals/UtilsGuilds'
+import { fetchAllGuild } from '../../Helpers/utils'
+import {
+    updateKeyInExistingDoc,
+    insertDataInExistingDoc,
+    deleteDataInExistingDoc,
+} from '../../Helpers/mongo'
+import { Config } from '../../Typings/config'
+const config: Config = require('../../config.json')
 
 // TODO: make config variable configurable per each guild (DATABASE)
 
 export default {
-    name: "ready",
+    name: 'ready',
     once: true,
 
     /**
      * @param {Client} client
      */
     execute(client: Client) {
-        console.log("The client is now ready!\n");
-        client.user.setActivity('POKEMON!', {type: "WATCHING"})
+        console.log('The client is now ready!\n')
+        client.user.setActivity('POKEMON!', { type: 'WATCHING' })
 
         // create and delete guilds that were added or deleted when the bot was offline
         createGuildDataOfflined(client)
@@ -34,14 +41,14 @@ export default {
 
         // TODO: Make a function "main" for this and make editable variable for the Interval time
         setInterval(() => {
-            fetchAllGuild(client).forEach(guild => {
+            fetchAllGuild(client).forEach((guild) => {
                 pokemon.isSpawnable(guild.id).then((bool) => {
-                    if(!bool) return
-                    pokemon.SpawningPokemon(guild.id);
+                    if (!bool) return
+                    pokemon.SpawningPokemon(guild.id)
                 })
 
-                return;
+                return
             })
         }, config.readyCooldown * 60000) // Each 2min
-    }
+    },
 }

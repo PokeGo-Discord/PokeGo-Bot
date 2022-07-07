@@ -1,16 +1,16 @@
 export interface Config {
     // Cooldown of main loop of the bot (seconds)
-    readyCooldown: number;
-            
+    readyCooldown: number
+
     // Time needed between the last spawn (seconds)
-    timeBetweenSpawn: number;
-            
+    timeBetweenSpawn: number
+
     // Time needed between the last message to reset the count of message (seconds)
-    timeBetweenMessage: number;
+    timeBetweenMessage: number
 
     // Time to detect spamming of an user (seconds)
-    spamTimeThreshold: number;
+    spamTimeThreshold: number
 
     // message count needed to spawn a pokemon (integer)
-    messageCountNeeded: number;
+    messageCountNeeded: number
 }
