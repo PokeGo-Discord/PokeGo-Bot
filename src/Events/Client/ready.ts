@@ -1,4 +1,4 @@
-import { Client } from 'discord.js'
+import { Client, Message } from 'discord.js'
 import * as pokemon from '../../Helpers/pokemon'
 import {
     createGuildDataOfflined,
@@ -22,7 +22,7 @@ export default {
     /**
      * @param {Client} client
      */
-    execute(client: Client) {
+    execute(client: Client, message: Message) {
         console.log('The client is now ready!\n')
         client.user.setActivity('POKEMON!', { type: 'WATCHING' })
 
@@ -44,7 +44,7 @@ export default {
             fetchAllGuild(client).forEach((guild) => {
                 pokemon.isSpawnable(guild.id).then((bool) => {
                     if (!bool) return
-                    pokemon.SpawningPokemon(guild.id)
+                    pokemon.SpawningPokemon(guild, client)
                 })
 
                 return

@@ -1,3 +1,4 @@
+import { Client, Guild, TextChannel } from 'discord.js'
 import { isSpawnDate, isGuildActive } from './utils'
 import { message_count } from '../Events/Client/messageCreate'
 import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
@@ -134,13 +135,15 @@ export class Pokemon {
  * Spawn a pokemon to the guild.
  * @param guildId
  */
-export async function SpawningPokemon(guildId: string): Promise<void> {
+export async function SpawningPokemon(guild: Guild, client: Client): Promise<void> {
     // Reset message_count
-    message_count[guildId] = 0
-    updateGuildLastSpawnDate(guildId)
+    message_count[guild.id] = 0
+    updateGuildLastSpawnDate(guild.id)
     let pokemon = new Pokemon()
     await pokemon.initPokemon()
-    console.log(pokemon)
+    let channel = client.channels.cache.get("993368815989694477") as TextChannel;
+    // TODO: SEND EMBED POKEMON, and AWAIT collector message
+
 }
 
 /**
