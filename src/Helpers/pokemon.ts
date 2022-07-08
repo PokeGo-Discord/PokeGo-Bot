@@ -1,8 +1,7 @@
 import { isSpawnDate, isGuildActive } from './utils'
 import { message_count } from '../Events/Client/messageCreate'
 import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
-import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, POKEMON_NAME_LANG } from './constants'
-import fetch from 'node-fetch'
+import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES} from './constants'
 
 /**
  * Class Pokemon
@@ -23,10 +22,13 @@ export class Pokemon {
     async initPokemon(): Promise<void> {
         this.name = await this.initName();
         this.level = await this.initLevel();
+        this.nature = await this.initNature();
         this.ivs = await this.initIvs();
         
         let baseStats: Record<string, number> = await this.getBaseStats(this.name);
         this.stats = await this.updateStats(baseStats);
+        
+        this.shiny = await this.initShiny();
     }
 
     /**
@@ -53,6 +55,25 @@ export class Pokemon {
             return Math.floor(Math.random() * (55 - 35) + 35); // entre 55 et 35
     }
 
+    /**
+     * Return a random nature
+     * @returns string
+     */
+    async initNature(): Promise<string> {
+        const keys = Object.keys(NATURES);
+        const nature_name = NATURES[keys[Math.floor(Math.random() * keys.length)]];
+        return nature_name;
+    }
+
+    /**
+     * Determine if the pokemon is shiny or not
+     * @returns boolean
+     */
+    async initShiny(): Promise<boolean> {
+        let chance = 1 / 4096;
+        return (Math.random() < chance)
+    }
+    
     /**
      * Initialise ivs of the pokemon
      * @returns ivs as object
@@ -98,9 +119,14 @@ export class Pokemon {
      * @returns number
      */
     private calc_stat(baseStats: Record<string, number>, statName: string): number {
-        return Math.floor(
-            ((this.ivs[statName] + 2 * baseStats[statName]) * this.level) / 100 + 5
-        )
+        if(statName == 'hp')
+            return Math.floor(
+                Math.floor((((this.ivs[statName] + 2 * baseStats[statName]) * this.level) / 100)) + this.level + 10
+            )
+        else
+            return Math.floor(
+                (Math.floor(((this.ivs[statName] + 2 * baseStats[statName]) * this.level) / 100) + 5) * NATURE_MULTIPLIERS[this.nature][statName]
+            )
     }
 }
 
