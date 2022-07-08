@@ -1,8 +1,14 @@
-import { statsInterface } from '../Typings/stats'
-
 export const STATS_NAME: string[] = ['hp', 'atk', 'def', 'satk', 'sdef', 'spd']
 
-export const POKEMON_BASE_STATS: Record<string, statsInterface> = {
+export const POKEMON_NAME_LANG = {
+    bulbasaur: { 'fr': 'Bulbizarre', 'en': 'bulbasaur'}
+}
+
+export const POKEMON_NAME = {
+    bulbasaur: 'bulbasaur'
+}
+
+export const POKEMON_BASE_STATS: Record<string, Record<string, number>> = {
     bulbasaur: { hp: 45, atk: 49, def: 49, satk: 65, sdef: 65, spd: 45 },
     charmander: { hp: 39, atk: 52, def: 43, satk: 60, sdef: 50, spd: 65 },
     squirtle: { hp: 44, atk: 48, def: 65, satk: 50, sdef: 64, spd: 43 },
