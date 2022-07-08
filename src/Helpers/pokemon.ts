@@ -21,23 +21,24 @@ export class Pokemon {
      * Init the pokemon, generate ivs / Stats / name / level and everything that needed for a pokemon
      */
     async initPokemon(): Promise<void> {
-        this.name = 'clefairy'
-        this.level = await this.initLevel()
-
-        await this.initIvs().then((res) => {
-            this.ivs = res
-        })
-
-        await this.getBaseStats(this.name).then(
-            async (baseStats: Record<string, number>) => {
-                console.log(baseStats)
-                await this.updateStats(baseStats).then((stats) => {
-                    this.stats = stats
-                })
-            }
-        )
+        this.name = await this.initName();
+        this.level = await this.initLevel();
+        this.ivs = await this.initIvs();
+        
+        let baseStats: Record<string, number> = await this.getBaseStats(this.name);
+        this.stats = await this.updateStats(baseStats);
     }
 
+    async initName(): Promise<string> {
+        const keys = Object.keys(POKEMON_NAME);
+        const pokemon_name = POKEMON_NAME[keys[Math.floor(Math.random() * keys.length)]];
+        return pokemon_name;
+    }
+
+    /**
+     * Return the level of the pokemon with percentages chances
+     * @returns number
+     */
     async initLevel(): Promise<number> {
         var d: number = Math.random();
         if(d < 0.6) // 60% chance of being here
