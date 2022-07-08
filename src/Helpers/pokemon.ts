@@ -29,6 +29,10 @@ export class Pokemon {
         this.stats = await this.updateStats(baseStats);
     }
 
+    /**
+     * Return a random pokemon name from the constant POKEMON_NAME
+     * @returns string
+     */
     async initName(): Promise<string> {
         const keys = Object.keys(POKEMON_NAME);
         const pokemon_name = POKEMON_NAME[keys[Math.floor(Math.random() * keys.length)]];
