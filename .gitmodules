@@ -1,0 +1,3 @@
+[submodule "src/src/Data"]
+	path = src/src/Data
+	url = https://github.com/PokeGo-Discord/Data

@@ -1,8 +1,14 @@
-import { Client, Guild, TextChannel } from 'discord.js'
+import { Client, Guild, TextChannel, MessageEmbed, MessageAttachment, Message, InteractionCollector, ApplicationCommand } from 'discord.js'
 import { isSpawnDate, isGuildActive } from './utils'
 import { message_count } from '../Events/Client/messageCreate'
 import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
-import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES} from './constants'
+import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES, POKEMON_FILE_PATH} from './constants'
+
+declare module "discord.js" {
+    export interface Interaction {
+        commandName: string
+    }
+}
 
 /**
  * Class Pokemon
@@ -36,7 +42,7 @@ export class Pokemon {
      * Return a random pokemon name from the constant POKEMON_NAME
      * @returns string
      */
-    async initName(): Promise<string> {
+    private async initName(): Promise<string> {
         const keys = Object.keys(POKEMON_NAME);
         const pokemon_name = POKEMON_NAME[keys[Math.floor(Math.random() * keys.length)]];
         return pokemon_name;
@@ -46,7 +52,7 @@ export class Pokemon {
      * Return the level of the pokemon with percentages chances
      * @returns number
      */
-    async initLevel(): Promise<number> {
+     private async initLevel(): Promise<number> {
         var d: number = Math.random();
         if(d < 0.6) // 60% chance of being here
             return Math.floor(Math.random() * (35 - 1) + 1); // entre 1 et 35
@@ -60,7 +66,7 @@ export class Pokemon {
      * Return a random nature
      * @returns string
      */
-    async initNature(): Promise<string> {
+    private async initNature(): Promise<string> {
         const keys = Object.keys(NATURES);
         const nature_name = NATURES[keys[Math.floor(Math.random() * keys.length)]];
         return nature_name;
@@ -70,7 +76,7 @@ export class Pokemon {
      * Determine if the pokemon is shiny or not
      * @returns boolean
      */
-    async initShiny(): Promise<boolean> {
+     private async initShiny(): Promise<boolean> {
         let chance = 1 / 4096;
         return (Math.random() < chance)
     }
@@ -79,7 +85,7 @@ export class Pokemon {
      * Initialise ivs of the pokemon
      * @returns ivs as object
      */
-    async initIvs(): Promise<Record<string, number>> {
+    private async initIvs(): Promise<Record<string, number>> {
         let ivs: Record<string, number> = {}
         for (let i = 0; i < STATS_NAME.length; i++) ivs[STATS_NAME[i]] = Math.floor(Math.random() * (32 - 1) + 1)
 
@@ -106,7 +112,7 @@ export class Pokemon {
      * @param pokemonName
      * @returns object
      */
-    private async getBaseStats(
+    async getBaseStats(
         pokemonName: string
     ): Promise<Record<string, number>> {
         const baseStats = POKEMON_BASE_STATS[pokemonName]
@@ -137,13 +143,44 @@ export class Pokemon {
  */
 export async function SpawningPokemon(guild: Guild, client: Client): Promise<void> {
     // Reset message_count
-    message_count[guild.id] = 0
-    updateGuildLastSpawnDate(guild.id)
-    let pokemon = new Pokemon()
-    await pokemon.initPokemon()
-    let channel = client.channels.cache.get("993368815989694477") as TextChannel;
-    // TODO: SEND EMBED POKEMON, and AWAIT collector message
+    message_count[guild.id] = 0;
+    updateGuildLastSpawnDate(guild.id);
 
+    const pokemon = new Pokemon();
+    await pokemon.initPokemon();
+
+    const channel: TextChannel = client.channels.cache.get("993368815989694477") as TextChannel;
+    await sendEmbedPokemon(channel, pokemon.name)
+
+    const collector = await new InteractionCollector(client, {channel: channel, interactionType: 'APPLICATION_COMMAND', guild: channel.guild, time: 15000})
+
+    collector.on("collect", async i => {
+        console.log(i)
+        collector.stop()
+    })
+
+    collector.on('end', collected => {
+        console.log(`Collected ${collected.size} interactions.`);
+    });
+
+}
+
+/**
+ * Create the embed pokemon and send it
+ * @param channel 
+ * @param pokemonName 
+ * @returns Message boolean
+ */
+export async function sendEmbedPokemon(channel: TextChannel, pokemonName: string): Promise<Message<boolean>> {
+    const file = new MessageAttachment(POKEMON_FILE_PATH[pokemonName].normal);
+    const attachment_string = 'attachment://' + pokemonName + '.gif';
+    const pokemonEmbed = new MessageEmbed()
+        .setColor('#fff585')
+        .setTitle('A wild pokémon has appeared!')
+        .setDescription('Guess the pokémon and type ``/catch <pokemon>`` to catch it!')
+        .setImage(attachment_string)
+
+    return await channel.send({ embeds: [pokemonEmbed], files:[file] });
 }
 
 /**
