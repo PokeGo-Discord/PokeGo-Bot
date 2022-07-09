@@ -3,13 +3,13 @@ import { promisify } from 'util'
 import { glob } from 'glob'
 import Ascii from 'ascii-table'
 import { Event } from '../Typings/Event'
+import Client from '../Extends/ExtendsClient'
 
 const globPromise = promisify(glob)
 
-module.exports = async (client) => {
-    const Table = new Ascii('Events Loaded')
-
-    ;(
+module.exports = async (client: Client) => {
+    const Table = new Ascii('Events Loaded');
+    (
         await globPromise(
             `${process.cwd().replace(/\\/g, '/')}/src/Events/**/*.ts`
         )

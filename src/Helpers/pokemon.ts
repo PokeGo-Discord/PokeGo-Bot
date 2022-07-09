@@ -1,14 +1,12 @@
-import { Client, Guild, TextChannel, MessageEmbed, MessageAttachment, Message, InteractionCollector, ApplicationCommand } from 'discord.js'
+import Client from '../Extends/ExtendsClient'
+import { Guild, TextChannel, MessageEmbed, MessageAttachment, Message, InteractionCollector, CommandInteraction } from 'discord.js'
 import { isSpawnDate, isGuildActive } from './utils'
 import { message_count } from '../Events/Client/messageCreate'
 import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
 import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES, POKEMON_FILE_PATH} from './constants'
+import { Command } from '../Typings/Command'
 
-declare module "discord.js" {
-    export interface Interaction {
-        commandName: string
-    }
-}
+export const pokemon_active: Record<string, boolean> = {}
 
 /**
  * Class Pokemon
@@ -146,21 +144,37 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
     message_count[guild.id] = 0;
     updateGuildLastSpawnDate(guild.id);
 
+    pokemon_active[guild.id] = true;
+
     const pokemon = new Pokemon();
     await pokemon.initPokemon();
+    console.log(pokemon.name);
 
     const channel: TextChannel = client.channels.cache.get("993368815989694477") as TextChannel;
     await sendEmbedPokemon(channel, pokemon.name)
 
     const collector = await new InteractionCollector(client, {channel: channel, interactionType: 'APPLICATION_COMMAND', guild: channel.guild, time: 15000})
 
-    collector.on("collect", async i => {
-        console.log(i)
-        collector.stop()
+    // TODO: TODO: TODO: TODO: Review message
+    collector.on("collect", async (i: CommandInteraction) => {
+        if(i.commandName != 'ping' || i.type != "APPLICATION_COMMAND") return        
+        const { options } = i
+        const res = options.getString('pokemon');
+        if(pokemon.name !== res) 
+            return i.reply({ content: 'Wrong pokemon', ephemeral:true });
+
+        i.reply({ content:'Bonne reponse', ephemeral: true})
+        channel.send('GG NOURS WHO FIND THE POKEMON')
+        collector.stop('finded')
     })
 
-    collector.on('end', collected => {
-        console.log(`Collected ${collected.size} interactions.`);
+    collector.on('end', (collected, reason) => {
+        console.log(reason);
+        if(!reason)
+            channel.send('Nobody find the correct answere')
+            
+        pokemon_active[guild.id] = false;
+        delete pokemon_active[guild.id];
     });
 
 }

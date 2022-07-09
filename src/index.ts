@@ -1,4 +1,5 @@
-import { Client, Collection } from 'discord.js'
+import Client from './Extends/ExtendsClient'
+import { Collection } from 'discord.js'
 import { connectDatabase } from './Helpers/mongo'
 
 require('dotenv').config()
