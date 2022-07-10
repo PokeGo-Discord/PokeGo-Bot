@@ -10,10 +10,10 @@ const globPromise = promisify(glob)
  * @param {Client} client
  */
 module.exports = async (client: Client) => {
-    const Table = new Ascii('Commands Loaded');
+    const Table = new Ascii('Commands  Loaded');
     (
         await globPromise(
-            `${process.cwd().replace(/\\/g, '/')}/src/Commands/**/*.ts`
+            `${process.cwd().replace(/\\/g, '/')}/src/Commands/Slash/*.ts`
         )
     ).map(async (file) => {
         const command = require(file).default
