@@ -157,7 +157,7 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
 
     // TODO: TODO: TODO: TODO: Review message
     collector.on("collect", async (i: CommandInteraction) => {
-        if(i.commandName != 'ping' || i.type != "APPLICATION_COMMAND") return        
+        if(i.commandName != 'catch' || i.type != "APPLICATION_COMMAND") return        
         const { options } = i
         const res = options.getString('pokemon');
         if(pokemon.name !== res) 
@@ -184,7 +184,7 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
             stats: pokemon.stats,
             shiny: pokemon.shiny,
         })
-        
+
         pokemon_active[guild.id] = false;
         delete pokemon_active[guild.id];
     });

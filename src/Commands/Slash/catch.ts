@@ -5,8 +5,8 @@ import { pokemon_active } from '../../Helpers/pokemon'
 
 export default {
     data: {
-        name: "ping",
-        description: "Ping",
+        name: "catch",
+        description: "Catch a pokemon",
         options: [
             {
                 name: "pokemon",
@@ -22,6 +22,7 @@ export default {
      * @param {CommandInteraction} interaction
      */
     execute(interaction: CommandInteraction, client: Client) {
+        // TODO: Review message
         if(pokemon_active[interaction.guild.id])
             return;
         else
