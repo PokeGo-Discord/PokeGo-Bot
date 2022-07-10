@@ -1,6 +1,7 @@
 import Client from '../Extends/ExtendsClient'
 import { Guild, TextChannel, MessageEmbed, MessageAttachment, Message, InteractionCollector, CommandInteraction } from 'discord.js'
 import { isSpawnDate, isGuildActive } from './utils'
+import { isUserExist } from '../Database/UtilsModals/UtilsUsers'
 import { message_count } from '../Events/Client/messageCreate'
 import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
 import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES, POKEMON_FILE_PATH} from './constants'
@@ -157,7 +158,12 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
 
     // TODO: TODO: TODO: TODO: Review message
     collector.on("collect", async (i: CommandInteraction) => {
-        if(i.commandName != 'catch' || i.type != "APPLICATION_COMMAND") return        
+        if(i.commandName != 'catch' || i.type != "APPLICATION_COMMAND") return
+        
+        const isRegistered = await isUserExist(i.user.id)
+        if(!isRegistered)
+            return i.reply({ content: 'You are not registered, please do: ``/start`` and choose a starter pokemon!', ephemeral:true})
+            
         const { options } = i
         const res = options.getString('pokemon');
         if(pokemon.name !== res) 
