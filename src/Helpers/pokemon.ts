@@ -4,7 +4,7 @@ import { isSpawnDate, isGuildActive } from './utils'
 import { message_count } from '../Events/Client/messageCreate'
 import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
 import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES, POKEMON_FILE_PATH} from './constants'
-import { Command } from '../Typings/Command'
+import pokemonsModal, { Pokemons } from '../Database/Modals/pokemonsModal'
 
 export const pokemon_active: Record<string, boolean> = {}
 
@@ -161,18 +161,30 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
         const { options } = i
         const res = options.getString('pokemon');
         if(pokemon.name !== res) 
-            return i.reply({ content: 'Wrong pokemon', ephemeral:true });
+            return i.reply({ content: 'That is the wrong pokémon', ephemeral:true });
 
-        i.reply({ content:'Bonne reponse', ephemeral: true})
-        channel.send('GG NOURS WHO FIND THE POKEMON')
+        i.reply({ content:'That is the good pokémon', ephemeral: true})
+        channel.send(i.user.username + ' found the correct pokemon, it was ' + pokemon.name)
+        pokemon.owner_id = i.user.id;
+        pokemon.owner_name = i.user.username;
         collector.stop('finded')
     })
 
     collector.on('end', (collected, reason) => {
-        console.log(reason);
         if(!reason)
             channel.send('Nobody find the correct answere')
-            
+
+        pokemonsModal.create({
+            owner_id: pokemon.owner_id,
+            owner_name: pokemon.owner_name,
+            name: pokemon.name,
+            level: pokemon.level,
+            nature: pokemon.nature,
+            ivs: pokemon.ivs,
+            stats: pokemon.stats,
+            shiny: pokemon.shiny,
+        })
+        
         pokemon_active[guild.id] = false;
         delete pokemon_active[guild.id];
     });
