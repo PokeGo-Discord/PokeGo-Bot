@@ -22,19 +22,55 @@ export class Pokemon {
     stats: Record<string, number>
     shiny: boolean
 
+    constructor(
+        pokemonName: string = undefined, 
+        level: number = undefined, 
+        nature: string = undefined,
+        ivs: Record<string, number> = undefined,
+        shiny: boolean = undefined
+        ) 
+    {
+        this.initPokemon(pokemonName, level, nature, ivs, shiny)
+    }
+
     /**
      * Init the pokemon, generate ivs / Stats / name / level and everything that needed for a pokemon
      */
-    async initPokemon(): Promise<void> {
-        this.name = await this.initName();
-        this.level = await this.initLevel();
-        this.nature = await this.initNature();
-        this.ivs = await this.initIvs();
+    async initPokemon(
+        pokemonName: string = undefined, 
+        level: number = undefined, 
+        nature: string = undefined,
+        ivs: Record<string, number> = undefined,
+        shiny: boolean = undefined,
+        ): Promise<void> 
+    {
+        if(pokemonName !== undefined)
+            this.name = pokemonName;
+        else
+            this.name = await this.initName();
+
+        if(level !== undefined)
+            this.level = level;
+        else
+            this.level = await this.initLevel();
+
+        if(nature !== undefined)
+            this.nature = nature;
+        else
+            this.nature = await this.initNature();
+
+        if(ivs !== undefined)
+            this.ivs = ivs;
+        else
+            this.ivs = await this.initIvs();
         
         let baseStats: Record<string, number> = await this.getBaseStats(this.name);
         this.stats = await this.updateStats(baseStats);
         
-        this.shiny = await this.initShiny();
+        if(shiny !== undefined)
+            this.shiny = shiny;
+        else
+            this.shiny = await this.initShiny();
     }
 
     /**
