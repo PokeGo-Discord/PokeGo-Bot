@@ -259,7 +259,7 @@ export async function isSpawnable(guildId: string): Promise<boolean> {
     let isActive = await isGuildActive(guildId)
     let isDate = await isSpawnDate(guildId)
     console.log(isActive + ' ' + isDate)
-    if (!isActive || !isDate) return false
+    if (!isActive || !isDate ||  pokemon_active[guildId]) return false
 
     return true
 }
