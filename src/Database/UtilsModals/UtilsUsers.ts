@@ -9,7 +9,7 @@ import usersModal, { Users } from '../Modals/usersModal'
  export const isUserExist = async (userId: string): Promise<boolean> => {
     const userData = await usersModal.findOne({ userId })
 
-    if (userData == null) return false
+    if (userData === null) return false
 
     return true
 }

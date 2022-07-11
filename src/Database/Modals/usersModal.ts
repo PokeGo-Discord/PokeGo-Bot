@@ -5,17 +5,17 @@ export interface Users {
     userName: string,
     userTag: string,
     numberPokemon: number,
-    accountCreated_at: Date,
-    accountEdit_at: Date,
+    accountCreated_at: number,
+    accountEdit_at: number,
 }
 
 export const Users = new Schema({
     userId: String,
     userName: String,
     userTag: String,
-    numberPokemon: Number,
-    accountCreated_at: Date,
-    accountEdit_at: Date,
+    numberPokemon: {type: Number, default: 0},
+    accountCreated_at: {type: Date, default: Date.now()},
+    accountEdit_at: {type: Date, default: Date.now()},
 })
 
 export default model<Users>('Users', Users)

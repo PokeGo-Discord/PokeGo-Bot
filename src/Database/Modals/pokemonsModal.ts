@@ -3,7 +3,6 @@ import { Pokemon } from '../../Helpers/pokemon'
 
 export interface Pokemons {
     owner_id: string
-    owner_name: string
     name: string
     level: number
     nature: string
@@ -13,8 +12,7 @@ export interface Pokemons {
 }
 
 export const Pokemons = new Schema({
-    owner_id: String,
-    owner_name: String,
+    owner_id: {type: Schema.Types.String, ref: 'Users'},
     name: String,
     level: Number,
     nature: String,

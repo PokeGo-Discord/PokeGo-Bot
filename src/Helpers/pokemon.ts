@@ -217,7 +217,6 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
 
         pokemonsModal.create({
             owner_id: pokemon.owner_id,
-            owner_name: pokemon.owner_name,
             name: pokemon.name,
             level: pokemon.level,
             nature: pokemon.nature,

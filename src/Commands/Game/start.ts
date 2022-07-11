@@ -1,7 +1,9 @@
-import { CommandInteraction, MessageEmbed, MessageActionRow, MessageSelectMenu, MessageSelectOptionData, MessageAttachment, Interaction, MessageButton, SelectMenuInteraction } from 'discord.js'
+import { CommandInteraction, MessageEmbed, MessageActionRow, MessageSelectMenu, MessageSelectOptionData, MessageAttachment, Interaction, MessageButton, SelectMenuInteraction , Message} from 'discord.js'
 import { Command } from '../../Typings/Command'
 import Client from '../../Extends/ExtendsClient'
 import { EMBED_COLOR, POKEMON_FILE_PATH } from '../../Helpers/constants'
+import usersModal from '../../Database/Modals/usersModal'
+import { isUserExist } from '../../Database/UtilsModals/UtilsUsers'
 
 // TODO: GET THE USER AND SAVE IT IN THE DATABASE THEN BLOCK THE COMMAND TO USER THAT ARE ALREADY REGISTERED.
 export default {
@@ -15,7 +17,8 @@ export default {
      * @param {Client} client
      * @param {CommandInteraction} interaction
      */
-    async execute(interaction: CommandInteraction, client: Client) {            
+    async execute(interaction: CommandInteraction, client: Client) { 
+        if(await isUserExist(interaction.user.id)) return interaction.reply({embeds: [createEmbedAlreadyRegisted()], ephemeral: true});
         coreRecursive(interaction)
     }
 } as Command
@@ -44,15 +47,18 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
             )
 
     if(iUpdate != null)
-        await iUpdate.update({ embeds: [starterEmbed], components: [row] })
+        await iUpdate.update({ embeds: [starterEmbed], components: [row], files: [] })
     else
-        await interaction.reply({ embeds: [starterEmbed], components: [row] });
+        await interaction.reply({ embeds: [starterEmbed], components: [row], ephemeral: true });
+
+    const message = await interaction.fetchReply() as Message
 
     let pokemonName = undefined;
 
     const filterSelect = (i: Interaction) => i.isSelectMenu() && i.customId === 'select_starter' && i.user.id === interaction.user.id;
-    const collectorSelect = interaction.channel.createMessageComponentCollector({ filter:filterSelect, time: 15000 });
+    const collectorSelect = message.createMessageComponentCollector({ filter:filterSelect, time: 30000 });
     collectorSelect.on('collect', async (i: SelectMenuInteraction) => {
+        console.log(i.id + ' RESPONS')
         pokemonName = i.values[0];
         const file = new MessageAttachment(POKEMON_FILE_PATH[pokemonName].normal);
         const selectPokemonEmbed = createEmbedSelectPokemon(pokemonName, file)
@@ -60,15 +66,12 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
         collectorSelect.stop('selected')
     });
 
-    collectorSelect.on('end', async (collected, reason) => {
-        console.log('COLLECTOR SELECT FINISH')
-        if(reason === 'time') return;
-
+    collectorSelect.on('end', async (collected, reason) => {        
         const filterCancel = (i: Interaction) => i.isButton() && i.customId === 'cancel_starter' && i.user.id === interaction.user.id;
-        const collectorCancel = interaction.channel.createMessageComponentCollector({ filter:filterCancel, time: 15000 });
+        const collectorCancel = message.createMessageComponentCollector({ filter:filterCancel, time: 15000 });
 
-        const filterConfirm = i => i.customId === 'confirm_starter' && i.user.id === interaction.user.id;
-        const collectorConfirm = interaction.channel.createMessageComponentCollector({ filter:filterConfirm, time: 15000 });
+        const filterConfirm = (i: Interaction) => i.isButton() && i.customId === 'confirm_starter' && i.user.id === interaction.user.id;
+        const collectorConfirm = message.createMessageComponentCollector({ filter:filterConfirm, time: 15000 });
 
         collectorCancel.on('collect', async (i: SelectMenuInteraction) => {
             collectorCancel.stop()
@@ -82,16 +85,20 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
             collectorConfirm.stop()
             const helpEmbed = createHelpEmbed(pokemonName)
             await i.update({ embeds: [helpEmbed], components: [], files: [] });
+
+            usersModal.create({
+                userId: i.user.id,
+                userName: i.user.username,
+                userTag: i.user.tag,
+            })
         });
 
         collectorCancel.on('end', async (collected, reason) => {
             console.log('COLLECTOR CANCEL FINISH')
-            if(reason === 'time') return;
         });
 
         collectorConfirm.on('end', async (collected, reason) => {
             console.log('COLLECTOR CONFIRM FINISH')
-            if(reason === 'time') return;
         });
     }) 
 }
@@ -140,12 +147,34 @@ export function createHelpEmbed(pokemonName: string): MessageEmbed {
     const attachment_string = 'attachment://' + pokemonName + '.gif';
     const selectedPokemonEmbed = new MessageEmbed()
         .setColor(EMBED_COLOR)
+        .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
         .setTitle('You are about to choose ``' + pokemonName + '``!')
         .setImage(attachment_string)
         .addField('\u200b', '\u200b', false)
 
-
     return selectedPokemonEmbed;
+}
+
+ export function createEmbedAlreadyRegisted(): MessageEmbed {
+    const embedAlreadyRegisted = new MessageEmbed()
+        .setColor(EMBED_COLOR)
+        .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
+        .setTitle('You are already registered!')
+        .setDescription('You can already catch pokémon and show off your Shinies and legendaries! I hope you will become the best pokemon trainer!')
+
+
+    return embedAlreadyRegisted;
+}
+
+export function createEmbedNoResponse(): MessageEmbed {
+    const embedNoResponse = new MessageEmbed()
+        .setColor(EMBED_COLOR)
+        .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
+        .setTitle('Are you still here?')
+        .setDescription('You took too long to answer, redo /start to start again!')
+
+
+    return embedNoResponse;
 }
 
 /**
