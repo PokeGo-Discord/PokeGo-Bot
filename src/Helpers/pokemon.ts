@@ -4,7 +4,7 @@ import { isSpawnDate, isGuildActive } from './utils'
 import { isUserExist } from '../Database/UtilsModals/UtilsUsers'
 import { message_count } from '../Events/Client/messageCreate'
 import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
-import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES, POKEMON_FILE_PATH} from './constants'
+import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES, POKEMON_FILE_PATH, EMBED_COLOR} from './constants'
 import pokemonsModal, { Pokemons } from '../Database/Modals/pokemonsModal'
 
 export const pokemon_active: Record<string, boolean> = {}
@@ -156,7 +156,6 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
 
     const collector = await new InteractionCollector(client, {channel: channel, interactionType: 'APPLICATION_COMMAND', guild: channel.guild, time: 15000})
 
-    // TODO: TODO: TODO: TODO: Review message
     collector.on("collect", async (i: CommandInteraction) => {
         if(i.commandName != 'catch' || i.type != "APPLICATION_COMMAND") return
         
@@ -207,7 +206,7 @@ export async function sendEmbedPokemon(channel: TextChannel, pokemonName: string
     const file = new MessageAttachment(POKEMON_FILE_PATH[pokemonName].normal);
     const attachment_string = 'attachment://' + pokemonName + '.gif';
     const pokemonEmbed = new MessageEmbed()
-        .setColor('#fff585')
+        .setColor(EMBED_COLOR)
         .setTitle('A wild pokémon has appeared!')
         .setDescription('Guess the pokémon and type ``/catch <pokemon>`` to catch it!')
         .setImage(attachment_string)

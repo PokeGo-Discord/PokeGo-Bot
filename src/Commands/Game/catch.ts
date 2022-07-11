@@ -22,7 +22,6 @@ export default {
      * @param {CommandInteraction} interaction
      */
     execute(interaction: CommandInteraction, client: Client) {
-        // TODO: Review message
         if(pokemon_active[interaction.guild.id])
             return;
         else

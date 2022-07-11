@@ -13,7 +13,7 @@ module.exports = async (client: Client) => {
     const Table = new Ascii('Commands  Loaded');
     (
         await globPromise(
-            `${process.cwd().replace(/\\/g, '/')}/src/Commands/Slash/*.ts`
+            `${process.cwd().replace(/\\/g, '/')}/src/Commands/**/*.ts`
         )
     ).map(async (file) => {
         const command = require(file).default

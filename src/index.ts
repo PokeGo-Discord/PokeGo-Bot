@@ -7,7 +7,7 @@ require('dotenv').config()
 const client = new Client({ partials: ['CHANNEL'], intents: 131071 })
 
 require('./Handlers/Events')(client)
-require('./Handlers/SlashCommands')(client)
+require('./Handlers/Commands')(client)
 
 connectDatabase()
 

@@ -1,4 +1,5 @@
 import process from 'process'
+import { ColorResolvable } from 'discord.js'
 
 
 export const STATS_NAME: string[] = ['hp', 'atk', 'def', 'satk', 'sdef', 'spd']
@@ -3867,3 +3868,5 @@ export const NATURE_MULTIPLIERS: Record<string, Record<string, number>> = {
         "spd": 1,
     },
 }
+
+export const EMBED_COLOR: ColorResolvable = "#fff585"
