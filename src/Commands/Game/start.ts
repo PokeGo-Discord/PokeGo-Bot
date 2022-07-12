@@ -4,6 +4,8 @@ import Client from '../../Extends/ExtendsClient'
 import { EMBED_COLOR, POKEMON_FILE_PATH } from '../../Helpers/constants'
 import usersModal from '../../Database/Modals/usersModal'
 import { isUserExist } from '../../Database/UtilsModals/UtilsUsers'
+import { Pokemon } from '../../Helpers/pokemon'
+import pokemonsModal from '../../Database/Modals/pokemonsModal'
 
 // TODO: GET THE USER AND SAVE IT IN THE DATABASE THEN BLOCK THE COMMAND TO USER THAT ARE ALREADY REGISTERED.
 export default {
@@ -66,7 +68,12 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
         collectorSelect.stop('selected')
     });
 
-    collectorSelect.on('end', async (collected, reason) => {        
+    collectorSelect.on('end', async (collected, reason) => {       
+        if(reason === 'time') {
+            interaction.editReply({embeds: [createEmbedNoResponse()], components: [], files: []}) 
+            return
+        }
+
         const filterCancel = (i: Interaction) => i.isButton() && i.customId === 'cancel_starter' && i.user.id === interaction.user.id;
         const collectorCancel = message.createMessageComponentCollector({ filter:filterCancel, time: 15000 });
 
@@ -83,21 +90,46 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
         collectorConfirm.on('collect', async (i: SelectMenuInteraction) => {
             collectorCancel.stop()
             collectorConfirm.stop()
-            const helpEmbed = createHelpEmbed(pokemonName)
-            await i.update({ embeds: [helpEmbed], components: [], files: [] });
 
-            usersModal.create({
+            if(await isUserExist(i.user.id)) return i.update({embeds: [createEmbedAlreadyRegisted()]});
+
+            await usersModal.create({
                 userId: i.user.id,
                 userName: i.user.username,
                 userTag: i.user.tag,
+                numberPokemon: 1,
             })
+
+            const starter = new Pokemon()
+            await starter.initPokemon(i.user.id, pokemonName)
+
+            pokemonsModal.create({
+                owner_id: starter.owner_id,
+                name: starter.name,
+                level: starter.level,
+                nature: starter.nature,
+                ivs: starter.ivs,
+                stats: starter.stats,
+                shiny: starter.shiny,
+            })
+
+            const helpEmbed = createHelpEmbed(pokemonName)
+            await i.update({ embeds: [helpEmbed], components: [], files: [] });
         });
 
         collectorCancel.on('end', async (collected, reason) => {
+            if(reason === 'time') {
+                interaction.editReply({embeds: [createEmbedNoResponse()], components: [], files: []}) 
+                return
+            }
             console.log('COLLECTOR CANCEL FINISH')
         });
 
         collectorConfirm.on('end', async (collected, reason) => {
+            if(reason === 'time') {
+                interaction.editReply({embeds: [createEmbedNoResponse()], components: [], files: []}) 
+                return
+            }
             console.log('COLLECTOR CONFIRM FINISH')
         });
     }) 

@@ -14,7 +14,6 @@ export const pokemon_active: Record<string, boolean> = {}
  */
 export class Pokemon {
     owner_id: string
-    owner_name: string
     name: string
     level: number
     nature: string
@@ -22,21 +21,11 @@ export class Pokemon {
     stats: Record<string, number>
     shiny: boolean
 
-    constructor(
-        pokemonName: string = undefined, 
-        level: number = undefined, 
-        nature: string = undefined,
-        ivs: Record<string, number> = undefined,
-        shiny: boolean = undefined
-        ) 
-    {
-        this.initPokemon(pokemonName, level, nature, ivs, shiny)
-    }
-
     /**
      * Init the pokemon, generate ivs / Stats / name / level and everything that needed for a pokemon
      */
     async initPokemon(
+        owner_id: string = undefined,
         pokemonName: string = undefined, 
         level: number = undefined, 
         nature: string = undefined,
@@ -44,6 +33,11 @@ export class Pokemon {
         shiny: boolean = undefined,
         ): Promise<void> 
     {
+        if(owner_id !== undefined)
+            this.owner_id = owner_id;
+        else 
+            this.owner_id = undefined
+
         if(pokemonName !== undefined)
             this.name = pokemonName;
         else
@@ -53,6 +47,8 @@ export class Pokemon {
             this.level = level;
         else
             this.level = await this.initLevel();
+
+        console.log(this.level)
 
         if(nature !== undefined)
             this.nature = nature;
@@ -207,7 +203,6 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
         i.reply({ content:'That is the good pokémon', ephemeral: true})
         channel.send(i.user.username + ' found the correct pokemon, it was ' + pokemon.name)
         pokemon.owner_id = i.user.id;
-        pokemon.owner_name = i.user.username;
         collector.stop('finded')
     })
 
