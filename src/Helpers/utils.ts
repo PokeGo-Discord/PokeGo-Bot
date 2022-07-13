@@ -1,10 +1,11 @@
-import { Guild } from 'discord.js'
+import { Guild, MessageEmbed } from 'discord.js'
 import {
     getGuildLastMessageDate,
     getGuildLastSpawnDate,
 } from '../Database/UtilsModals/UtilsGuilds'
 import { message_count } from '../Events/Client/messageCreate'
 import { Config } from '../Typings/config'
+import { EMBED_COLOR } from './constants'
 const config: Config = require('../config.json')
 
 // TODO: make config variable configurable per each guild (DATABASE)
@@ -93,6 +94,17 @@ export async function isSpawnDate(guildId: string): Promise<boolean> {
         return false
     return true
 }
+
+export function createEmbedNoRegisted(): MessageEmbed {
+    const embedAlreadyRegisted = new MessageEmbed()
+        .setColor(EMBED_COLOR)
+        .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
+        .setTitle('You are not registered!')
+        .setDescription('Please do: ``/start`` and choose a starter pokemon!')
+
+    return embedAlreadyRegisted;
+}
+
 
 /**
  * Sen a console.log only when the debug environment is ON
