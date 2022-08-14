@@ -2,7 +2,6 @@ import { model, Schema } from 'mongoose'
 import { Pokemon } from '../../Helpers/pokemon'
 
 export interface Pokemons {
-    owner_id: string
     name: string
     level: number
     nature: string
@@ -11,8 +10,7 @@ export interface Pokemons {
     shiny: boolean
 }
 
-export const Pokemons = new Schema({
-    owner_id: {type: Schema.Types.String, ref: 'Users'},
+export const pokemonSchema = new Schema({
     name: String,
     level: Number,
     nature: String,
@@ -22,4 +20,4 @@ export const Pokemons = new Schema({
 })
 
 
-export default model<Pokemons>('Pokemons', Pokemons)
+export default model<Pokemons>('Pokemon', pokemonSchema)

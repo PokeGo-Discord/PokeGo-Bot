@@ -183,7 +183,7 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
     await pokemon.initPokemon();
     console.log(pokemon.name);
 
-    const channel: TextChannel = client.channels.cache.get("993368815989694477") as TextChannel;
+    const channel: TextChannel = client.channels.cache.get("993372173269999628") as TextChannel;
     await sendEmbedPokemon(channel, pokemon.name)
 
     const collector = await new InteractionCollector(client, {channel: channel, interactionType: 'APPLICATION_COMMAND', guild: channel.guild, time: 15000})
@@ -257,3 +257,4 @@ export async function isSpawnable(guildId: string): Promise<boolean> {
 
     return true
 }
+

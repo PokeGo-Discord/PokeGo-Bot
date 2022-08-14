@@ -93,18 +93,16 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
 
             if(await isUserExist(i.user.id)) return i.update({embeds: [createEmbedAlreadyRegisted()]});
 
-            await usersModal.create({
+            let User = await usersModal.create({
                 userId: i.user.id,
                 userName: i.user.username,
-                userTag: i.user.tag,
                 numberPokemon: 1,
             })
 
             const starter = new Pokemon()
             await starter.initPokemon(i.user.id, pokemonName)
 
-            pokemonsModal.create({
-                owner_id: starter.owner_id,
+            let pokemon = await pokemonsModal.create({
                 name: starter.name,
                 level: starter.level,
                 nature: starter.nature,
@@ -112,6 +110,9 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
                 stats: starter.stats,
                 shiny: starter.shiny,
             })
+
+            User.pokemons.push(pokemon)
+            User.save()
 
             const helpEmbed = createHelpEmbed(pokemonName)
             await i.update({ embeds: [helpEmbed], components: [], files: [] });
