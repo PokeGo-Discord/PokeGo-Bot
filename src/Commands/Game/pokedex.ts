@@ -2,7 +2,7 @@ import { CommandInteraction, MessageEmbed, MessageActionRow, MessageButton, Inte
 import { Command } from '../../Typings/Command'
 import Client from '../../Extends/ExtendsClient'
 import { pokemon_active } from '../../Helpers/pokemon'
-import { getPokemonsNameUser, getPokemonsUser, isUserExist } from '../../Database/UtilsModals/UtilsUsers'
+import { getOnlyNamePokemonsUser, getPokemonsUser, isUserExist } from '../../Database/UtilsModals/UtilsUsers'
 import { createEmbedNoRegisted } from '../../Helpers/utils'
 import { EMBED_COLOR, ID_DEX, POKEMON_DEX, POKEMON_NAME } from '../../Helpers/constants'
 
@@ -30,7 +30,8 @@ export default {
 } as Command
 
 async function displayPokedex(interaction: CommandInteraction, page: number, iUpdate: SelectMenuInteraction = null) {
-    const pokemonName = await getPokemonsNameUser(interaction.user.id)
+    const pokemonName = await getOnlyNamePokemonsUser(interaction.user.id)
+    console.log(pokemonName)
     const p = (10 * page)
     const slicedPokemon = POKEMON_DEX.slice(p, p + 10);
     const slicedId = ID_DEX.slice(p, p + 10)

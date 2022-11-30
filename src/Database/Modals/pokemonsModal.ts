@@ -2,6 +2,7 @@ import { model, Schema } from 'mongoose'
 import { Pokemon } from '../../Helpers/pokemon'
 
 export interface Pokemons {
+    owner_id: string
     name: string
     level: number
     nature: string
@@ -11,6 +12,9 @@ export interface Pokemons {
 }
 
 export const pokemonSchema = new Schema({
+    owner_id: {
+        type: Schema.Types.ObjectId, ref: 'User'
+    },
     name: String,
     level: Number,
     nature: String,

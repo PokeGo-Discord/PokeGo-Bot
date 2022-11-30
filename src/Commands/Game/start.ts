@@ -5,7 +5,9 @@ import { EMBED_COLOR, POKEMON_FILE_PATH } from '../../Helpers/constants'
 import usersModal from '../../Database/Modals/usersModal'
 import { isUserExist } from '../../Database/UtilsModals/UtilsUsers'
 import { Pokemon } from '../../Helpers/pokemon'
+import { TeamUser } from '../../Helpers/teams'
 import pokemonsModal from '../../Database/Modals/pokemonsModal'
+import teamsModal from '../../Database/Modals/teamsModal'
 
 // TODO: GET THE USER AND SAVE IT IN THE DATABASE THEN BLOCK THE COMMAND TO USER THAT ARE ALREADY REGISTERED.
 export default {
@@ -100,9 +102,10 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
             })
 
             const starter = new Pokemon()
-            await starter.initPokemon(i.user.id, pokemonName)
+            await starter.initPokemon(User.id, pokemonName)
 
             let pokemon = await pokemonsModal.create({
+                owner_id: starter.owner_id,
                 name: starter.name,
                 level: starter.level,
                 nature: starter.nature,
@@ -111,8 +114,13 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
                 shiny: starter.shiny,
             })
 
-            User.pokemons.push(pokemon)
-            User.save()
+            const team = new TeamUser()
+            await team.initTeam(User.id, pokemon.id)
+
+            let team_doc = await teamsModal.create({
+                owner_id: team.owner_id,
+                pokemons_id: team.pokemons_id,
+            })
 
             const helpEmbed = createHelpEmbed(pokemonName)
             await i.update({ embeds: [helpEmbed], components: [], files: [] });

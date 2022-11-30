@@ -5,6 +5,7 @@ import { pokemon_active } from '../../Helpers/pokemon'
 import { isUserExist } from '../../Database/UtilsModals/UtilsUsers'
 import { createEmbedNoRegisted } from '../../Helpers/utils'
 import { EMBED_COLOR } from '../../Helpers/constants'
+import { getPokemonsUser } from '../../Database/UtilsModals/UtilsUsers'
 
 export default {
     data: {
@@ -25,6 +26,7 @@ export default {
         .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
         .setTitle('You are not registered!')
         .setDescription('Please do: ``/start`` and choose a starter pokemon!')
-
+        
+        getPokemonsUser(interaction.user.id)
     }
 } as Command

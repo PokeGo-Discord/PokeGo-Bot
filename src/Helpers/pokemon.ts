@@ -1,7 +1,7 @@
 import Client from '../Extends/ExtendsClient'
 import { Guild, TextChannel, MessageEmbed, MessageAttachment, Message, InteractionCollector, CommandInteraction } from 'discord.js'
 import { isSpawnDate, isGuildActive } from './utils'
-import { isUserExist } from '../Database/UtilsModals/UtilsUsers'
+import { isUserExist, getUserId } from '../Database/UtilsModals/UtilsUsers'
 import { message_count } from '../Events/Client/messageCreate'
 import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
 import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES, POKEMON_FILE_PATH, EMBED_COLOR} from './constants'
@@ -173,9 +173,6 @@ export class Pokemon {
  * @param guildId
  */
 export async function SpawningPokemon(guild: Guild, client: Client): Promise<void> {
-    // Reset message_count
-    message_count[guild.id] = 0;
-    updateGuildLastSpawnDate(guild.id);
 
     pokemon_active[guild.id] = true;
 
@@ -187,6 +184,7 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
     await sendEmbedPokemon(channel, pokemon.name)
 
     const collector = await new InteractionCollector(client, {channel: channel, interactionType: 'APPLICATION_COMMAND', guild: channel.guild, time: 15000})
+
 
     collector.on("collect", async (i: CommandInteraction) => {
         if(i.commandName != 'catch' || i.type != "APPLICATION_COMMAND") return
@@ -202,13 +200,25 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
 
         i.reply({ content:'That is the good pokémon', ephemeral: true})
         channel.send(i.user.username + ' found the correct pokemon, it was ' + pokemon.name)
-        pokemon.owner_id = i.user.id;
+        pokemon.owner_id = await getUserId(i.user.id);
         collector.stop('finded')
     })
 
     collector.on('end', (collected, reason) => {
-        if(!reason)
+        pokemon_active[guild.id] = false;
+        delete pokemon_active[guild.id];
+
+        // Reset message_count
+        message_count[guild.id] = 0;
+        updateGuildLastSpawnDate(guild.id);
+        
+        console.log(reason)
+        if(reason == "time") {
             channel.send('Nobody find the correct answere')
+            return;
+        }
+
+        console.log(pokemon)
 
         pokemonsModal.create({
             owner_id: pokemon.owner_id,
@@ -220,8 +230,7 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
             shiny: pokemon.shiny,
         })
 
-        pokemon_active[guild.id] = false;
-        delete pokemon_active[guild.id];
+
     });
 
 }
@@ -252,7 +261,7 @@ export async function sendEmbedPokemon(channel: TextChannel, pokemonName: string
 export async function isSpawnable(guildId: string): Promise<boolean> {
     let isActive = await isGuildActive(guildId)
     let isDate = await isSpawnDate(guildId)
-    console.log(isActive + ' ' + isDate)
+    //console.log(isActive + ' ' + isDate)
     if (!isActive || !isDate ||  pokemon_active[guildId]) return false
 
     return true
