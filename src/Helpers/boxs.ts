@@ -1,6 +1,6 @@
 export class Boxs {
-    owner_id: string
-    pokemons_id: string[][]
+    ownerId: string
+    pokemonsId: string[][]
 
     /**
      * Init the box
@@ -9,6 +9,31 @@ export class Boxs {
             owner_id: string,
         ): Promise<void> 
     {
-        this.owner_id = owner_id;
+        this.ownerId = owner_id;
+    }
+
+    async loadBox(
+        owner_id: string,
+        pokemons_id: string[][]
+    ): Promise<void>
+    {
+        this.ownerId = owner_id;
+        this.pokemonsId = pokemons_id;
+    }
+
+    public addPokemon(pokemonId) {
+        this.getPokemonsId().push(pokemonId)
+    }
+
+    public printPokemonsArray() {
+        console.log(this.pokemonsId)
+    }
+
+    private async removePokemon(pokemonId) {
+        
+    }
+
+    public getPokemonsId() {
+        return this.pokemonsId;
     }
 }

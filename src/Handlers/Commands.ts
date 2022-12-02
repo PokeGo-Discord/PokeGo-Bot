@@ -5,6 +5,8 @@ import Client from '../Extends/ExtendsClient'
 import { ApplicationCommandDataResolvable } from 'discord.js'
 import { Collection } from 'mongoose'
 import { Command } from '../Typings/Command'
+import { SlashCommandBuilder } from '@discordjs/builders';
+
 
 
 const globPromise = promisify(glob)
@@ -17,6 +19,7 @@ module.exports = async (client: Client) => {
     const TableOwner = new Ascii('Owner Commands Loaded')
     const commandPath = process.cwd().replace(/\\/g, '/') + '/src/Commands';
 
+    
     (
         await globPromise(
             `${commandPath}/**/*.ts`, { ignore: `${commandPath}/Owner/*.ts` }
@@ -24,7 +27,6 @@ module.exports = async (client: Client) => {
     ).map(async (file) => {
         const command = require(file).default
         const L = file.split('/')
-
         if(!command || !command?.data?.name)
             await TableGlobal.addRow(`${L[6]}`, `❌ command name either invalid or missing`)
 
@@ -51,6 +53,7 @@ module.exports = async (client: Client) => {
         await TableOwner.addRow(command.data.name, '✔ SUCCESSFUL')
     })
 
+    console.log(client.commands)
 
     console.log(TableGlobal.toString())
     console.log(TableOwner.toString())

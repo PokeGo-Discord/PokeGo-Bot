@@ -132,7 +132,7 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
             await box.initBox(User.id)
 
             await boxModal.create({
-                owner_id: box.owner_id
+                owner_id: box.ownerId
             })
 
             const helpEmbed = createHelpEmbed(pokemonName)
