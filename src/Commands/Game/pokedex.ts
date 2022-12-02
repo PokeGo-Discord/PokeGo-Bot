@@ -1,10 +1,9 @@
 import { CommandInteraction, MessageEmbed, MessageActionRow, MessageButton, Interaction, Message, SelectMenuInteraction } from 'discord.js'
 import { Command } from '../../Typings/Command'
 import Client from '../../Extends/ExtendsClient'
-import { pokemon_active } from '../../Helpers/pokemon'
-import { getOnlyNamePokemonsUser, getPokemonsUser, isUserExist } from '../../Database/UtilsModals/UtilsUsers'
-import { createEmbedNoRegisted } from '../../Helpers/utils'
-import { EMBED_COLOR, ID_DEX, POKEMON_DEX, POKEMON_NAME } from '../../Helpers/constants'
+import { getOnlyNamePokemonsUser } from '../../Database/UtilsModals/UtilsUsers'
+import { EMBED_COLOR } from '../../Helpers/constants'
+import { getAllPokemonName } from '../../Api/PokemonApi'
 
 export default {
     data: {
@@ -30,11 +29,16 @@ export default {
 } as Command
 
 async function displayPokedex(interaction: CommandInteraction, page: number, iUpdate: SelectMenuInteraction = null) {
+
+    if(page < 0)
+        page = 45
+    else if(page > 45)
+        page = 0
+
     const pokemonName = await getOnlyNamePokemonsUser(interaction.user.id)
     console.log(pokemonName)
-    const p = (10 * page)
-    const slicedPokemon = POKEMON_DEX.slice(p, p + 10);
-    const slicedId = ID_DEX.slice(p, p + 10)
+    const p = (20 * page)
+    const slicedPokemon = await getAllPokemonName(p) as string[];
     const pokeballEmoji = interaction.client.emojis.cache.get("1008496323768631318");
     const pokedexEmbed = new MessageEmbed()
     .setColor(EMBED_COLOR)
@@ -42,15 +46,15 @@ async function displayPokedex(interaction: CommandInteraction, page: number, iUp
     .setTitle(`${interaction.user.username} Pokedex`)
 
     var str = `You have caught ${pokemonName.length} out of 905 pokémon\n\n`
-    let idx = 0
+    let idx = p
     slicedPokemon.forEach(e => {
-        const ayy = interaction.client.emojis.cache.find(emoji => emoji.name === e);
+        idx++
+        const ayy = interaction.client.emojis.cache.find(emoji => emoji.name === e.replace(/\-/g, ''));
         const isCatch = pokemonName.includes(e.toLowerCase())
         if(isCatch)
-            str += "``" + `#${slicedId[idx]}` + "``⠀" + `${ayy} ${e}` + "⠀" + `${pokeballEmoji}` + "\n"
+            str += "``" + `#${lpad(idx, 3, 0)}` + "``⠀" + `${ayy} ${e}` + "⠀" + `${pokeballEmoji}` + "\n"
         else
-            str += "``" + `#${slicedId[idx]}` + "``⠀" + `${ayy} ${e}` + "⠀" + "\n"
-        idx++
+            str += "``" + `#${lpad(idx, 3, 0)}` + "``⠀" + `${ayy} ${e}` + "⠀" + "\n"
     });
     pokedexEmbed.setDescription(str)
 
@@ -91,4 +95,8 @@ async function displayPokedex(interaction: CommandInteraction, page: number, iUp
         collectorPrevious.stop()
         displayPokedex(interaction, page + 1, i)
     });
+}
+
+function lpad(s, width, char) {
+    return (s.length >= width) ? s : (new Array(width).join(char) + s).slice(-width);
 }

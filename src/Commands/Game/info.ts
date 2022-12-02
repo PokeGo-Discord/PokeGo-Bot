@@ -6,6 +6,7 @@ import { isUserExist } from '../../Database/UtilsModals/UtilsUsers'
 import { createEmbedNoRegisted } from '../../Helpers/utils'
 import { EMBED_COLOR } from '../../Helpers/constants'
 import { getPokemonsUser } from '../../Database/UtilsModals/UtilsUsers'
+import { getBaseStats } from '../../Api/pokemonApi'
 
 export default {
     data: {
@@ -27,6 +28,6 @@ export default {
         .setTitle('You are not registered!')
         .setDescription('Please do: ``/start`` and choose a starter pokemon!')
         
-        getPokemonsUser(interaction.user.id)
+        getBaseStats(1)
     }
 } as Command

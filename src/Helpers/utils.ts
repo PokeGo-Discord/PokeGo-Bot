@@ -5,7 +5,7 @@ import {
 } from '../Database/UtilsModals/UtilsGuilds'
 import { message_count } from '../Events/Client/messageCreate'
 import { Config } from '../Typings/config'
-import { EMBED_COLOR } from './constants'
+import { EMBED_COLOR, POKEMON_NORMAL_FILE_PATH, POKEMON_SHINY_FILE_PATH } from './constants'
 const config: Config = require('../config.json')
 
 // TODO: make config variable configurable per each guild (DATABASE)
@@ -103,6 +103,17 @@ export function createEmbedNoRegisted(): MessageEmbed {
         .setDescription('Please do: ``/start`` and choose a starter pokemon!')
 
     return embedAlreadyRegisted;
+}
+
+export function getPathFile(pokemonName: string, shiny = false): string {
+    let PATH: string = '';
+    if(shiny)
+        PATH = POKEMON_SHINY_FILE_PATH + pokemonName + '.gif'
+
+    if(!shiny)
+        PATH = POKEMON_NORMAL_FILE_PATH + pokemonName + '.gif'
+
+    return PATH;
 }
 
 

@@ -1,15 +1,16 @@
 import { CommandInteraction, MessageEmbed, MessageActionRow, MessageSelectMenu, MessageSelectOptionData, MessageAttachment, Interaction, MessageButton, SelectMenuInteraction , Message} from 'discord.js'
 import { Command } from '../../Typings/Command'
 import Client from '../../Extends/ExtendsClient'
-import { EMBED_COLOR, POKEMON_FILE_PATH } from '../../Helpers/constants'
+import { EMBED_COLOR, POKEMON_NORMAL_FILE_PATH } from '../../Helpers/constants'
 import usersModal from '../../Database/Modals/usersModal'
 import { isUserExist } from '../../Database/UtilsModals/UtilsUsers'
 import { Pokemon } from '../../Helpers/pokemon'
 import { TeamUser } from '../../Helpers/teams'
 import pokemonsModal from '../../Database/Modals/pokemonsModal'
 import teamsModal from '../../Database/Modals/teamsModal'
+import { getPathFile } from '../../Helpers/utils'
+import { getSpecieName } from '../../Api/PokemonApi'
 
-// TODO: GET THE USER AND SAVE IT IN THE DATABASE THEN BLOCK THE COMMAND TO USER THAT ARE ALREADY REGISTERED.
 export default {
     data: {
         name: "start",
@@ -57,14 +58,17 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
 
     const message = await interaction.fetchReply() as Message
 
+    let pokemonId = undefined;
     let pokemonName = undefined;
+
 
     const filterSelect = (i: Interaction) => i.isSelectMenu() && i.customId === 'select_starter' && i.user.id === interaction.user.id;
     const collectorSelect = message.createMessageComponentCollector({ filter:filterSelect, time: 30000 });
     collectorSelect.on('collect', async (i: SelectMenuInteraction) => {
         console.log(i.id + ' RESPONS')
-        pokemonName = i.values[0];
-        const file = new MessageAttachment(POKEMON_FILE_PATH[pokemonName].normal);
+        pokemonId = i.values[0];
+        const pokemonName = await getSpecieName(pokemonId)
+        const file = new MessageAttachment(getPathFile(pokemonName));
         const selectPokemonEmbed = createEmbedSelectPokemon(pokemonName, file)
         await i.update({ embeds: [selectPokemonEmbed], files: [file], components: [btn] });
         collectorSelect.stop('selected')
@@ -97,15 +101,15 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
 
             let User = await usersModal.create({
                 userId: i.user.id,
-                userName: i.user.username,
                 numberPokemon: 1,
             })
 
             const starter = new Pokemon()
-            await starter.initPokemon(User.id, pokemonName)
+            await starter.initPokemon(User.id, pokemonId)
 
             let pokemon = await pokemonsModal.create({
                 owner_id: starter.owner_id,
+                pokemonId: starter.pokemonId,
                 name: starter.name,
                 level: starter.level,
                 nature: starter.nature,
@@ -225,122 +229,122 @@ const action_row: MessageSelectOptionData[] = [
     {
         label: 'Bulbasaur',
         description: 'Generation I',
-        value: 'bulbasaur',
+        value: '1',
     },
     {
         label: 'Charmander',
         description: 'Generation I',
-        value: 'charmander',
+        value: '4',
     },
     {
         label: 'Squirtle',
         description: 'Generation I',
-        value: 'squirtle',
+        value: '7',
     },
     {
         label: 'Chikorita',
         description: 'Generation II',
-        value: 'chikorita',
+        value: '152',
     },
     {
         label: 'Cyndaquil',
         description: 'Generation II',
-        value: 'cyndaquil',
+        value: '155',
     },
     {
         label: 'Totodile',
         description: 'Generation II',
-        value: 'totodile',
+        value: '158',
     },
     {
         label: 'Treecko',
         description: 'Generation III',
-        value: 'treecko',
+        value: '252',
     },
     {
         label: 'Torchic',
         description: 'Generation III',
-        value: 'torchic',
+        value: '255',
     },
     {
         label: 'Mudkip',
         description: 'Generation III',
-        value: 'mudkip',
+        value: '258',
     },
     {
         label: 'Turtwig',
         description: 'Generation IV',
-        value: 'turtwig',
+        value: '387',
     },
     {
         label: 'Chimchar',
         description: 'Generation IV',
-        value: 'chimchar',
+        value: '390',
     },
     {
         label: 'Piplup',
         description: 'Generation IV',
-        value: 'piplup',
+        value: '393',
     },
     {
         label: 'Snivy',
         description: 'Generation V',
-        value: 'snivy',
+        value: '495',
     },
     {
         label: 'Tepig',
         description: 'Generation V',
-        value: 'tepig',
+        value: '498',
     },
     {
         label: 'Oshawott',
         description: 'Generation V',
-        value: 'oshawott',
+        value: '501',
     },
     {
         label: 'Chespin',
         description: 'Generation VI',
-        value: 'chespin',
+        value: '650',
     },
     {
         label: 'Fennekin',
         description: 'Generation VI',
-        value: 'fennekin',
+        value: '653',
     },
     {
         label: 'Froakie',
         description: 'Generation VI',
-        value: 'froakie',
+        value: '656',
     },
     {
         label: 'Rowlet',
         description: 'Generation VII',
-        value: 'rowlet',
+        value: '722',
     },
     {
         label: 'Litten',
         description: 'Generation VII',
-        value: 'litten',
+        value: '725',
     },
     {
         label: 'Popplio',
         description: 'Generation VII',
-        value: 'popplio',
+        value: '728',
     },
     {
         label: 'Grookey',
         description: 'Generation VIII',
-        value: 'grookey',
+        value: '810',
     },
     {
         label: 'Scorbunny',
         description: 'Generation VII',
-        value: 'scorbunny',
+        value: '813',
     },
     {
         label: 'Sobble',
         description: 'Generation VIII',
-        value: 'sobble',
+        value: '816',
     },
     
 ]

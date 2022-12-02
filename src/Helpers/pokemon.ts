@@ -1,11 +1,12 @@
 import Client from '../Extends/ExtendsClient'
 import { Guild, TextChannel, MessageEmbed, MessageAttachment, Message, InteractionCollector, CommandInteraction } from 'discord.js'
-import { isSpawnDate, isGuildActive } from './utils'
+import { isSpawnDate, isGuildActive, getPathFile } from './utils'
 import { isUserExist, getUserId } from '../Database/UtilsModals/UtilsUsers'
 import { message_count } from '../Events/Client/messageCreate'
 import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
-import { STATS_NAME, POKEMON_BASE_STATS, POKEMON_NAME, NATURE_MULTIPLIERS, NATURES, POKEMON_FILE_PATH, EMBED_COLOR} from './constants'
+import { STATS_NAME, NATURE_MULTIPLIERS, NATURES, EMBED_COLOR} from './constants'
 import pokemonsModal, { Pokemons } from '../Database/Modals/pokemonsModal'
+import { BaseStatsType, getBaseStats, getSpecieName } from '../Api/PokemonApi'
 
 export const pokemon_active: Record<string, boolean> = {}
 
@@ -14,6 +15,7 @@ export const pokemon_active: Record<string, boolean> = {}
  */
 export class Pokemon {
     owner_id: string
+    pokemonId: number
     name: string
     level: number
     nature: string
@@ -26,6 +28,7 @@ export class Pokemon {
      */
     async initPokemon(
         owner_id: string = undefined,
+        pokemonId: number = undefined,
         pokemonName: string = undefined, 
         level: number = undefined, 
         nature: string = undefined,
@@ -37,6 +40,11 @@ export class Pokemon {
             this.owner_id = owner_id;
         else 
             this.owner_id = undefined
+
+        if(pokemonId !== undefined)
+            this.pokemonId = pokemonId;
+        else
+            this.pokemonId = await this.initPokemonId();
 
         if(pokemonName !== undefined)
             this.name = pokemonName;
@@ -60,7 +68,7 @@ export class Pokemon {
         else
             this.ivs = await this.initIvs();
         
-        let baseStats: Record<string, number> = await this.getBaseStats(this.name);
+        let baseStats: BaseStatsType= await getBaseStats(this.pokemonId) as BaseStatsType;
         this.stats = await this.updateStats(baseStats);
         
         if(shiny !== undefined)
@@ -70,13 +78,21 @@ export class Pokemon {
     }
 
     /**
-     * Return a random pokemon name from the constant POKEMON_NAME
+     * Return a random pokemon id
+     * @returns string
+     */
+    private async initPokemonId(): Promise<number> {
+        const min = 1;
+        const max = 905;
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    /**
+     * Return a pokemon name by pokedex id 
      * @returns string
      */
     private async initName(): Promise<string> {
-        const keys = Object.keys(POKEMON_NAME);
-        const pokemon_name = POKEMON_NAME[keys[Math.floor(Math.random() * keys.length)]];
-        return pokemon_name;
+        return await getSpecieName(this.pokemonId);
     }
 
     /**
@@ -136,18 +152,6 @@ export class Pokemon {
             stats[STATS_NAME[i]] = await this.calc_stat(baseStats, STATS_NAME[i])
 
         return stats
-    }
-
-    /**
-     * Get base stats of a pokemon by his name
-     * @param pokemonName
-     * @returns object
-     */
-    async getBaseStats(
-        pokemonName: string
-    ): Promise<Record<string, number>> {
-        const baseStats = POKEMON_BASE_STATS[pokemonName]
-        return baseStats
     }
 
     /**
@@ -222,6 +226,7 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
 
         pokemonsModal.create({
             owner_id: pokemon.owner_id,
+            pokemonId: pokemon.pokemonId,
             name: pokemon.name,
             level: pokemon.level,
             nature: pokemon.nature,
@@ -242,7 +247,7 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
  * @returns Message boolean
  */
 export async function sendEmbedPokemon(channel: TextChannel, pokemonName: string): Promise<Message<boolean>> {
-    const file = new MessageAttachment(POKEMON_FILE_PATH[pokemonName].normal);
+    const file = new MessageAttachment(getPathFile(pokemonName));
     const attachment_string = 'attachment://' + pokemonName + '.gif';
     const pokemonEmbed = new MessageEmbed()
         .setColor(EMBED_COLOR)
