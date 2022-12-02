@@ -5,11 +5,13 @@ import { EMBED_COLOR, POKEMON_NORMAL_FILE_PATH } from '../../Helpers/constants'
 import usersModal from '../../Database/Modals/usersModal'
 import { isUserExist } from '../../Database/UtilsModals/UtilsUsers'
 import { Pokemon } from '../../Helpers/pokemon'
-import { TeamUser } from '../../Helpers/teams'
+import { Team } from '../../Helpers/teams'
 import pokemonsModal from '../../Database/Modals/pokemonsModal'
 import teamsModal from '../../Database/Modals/teamsModal'
 import { getPathFile } from '../../Helpers/utils'
 import { getSpecieName } from '../../Api/PokemonApi'
+import { Boxs } from '../../Helpers/boxs'
+import boxModal from '../../Database/Modals/boxModal'
 
 export default {
     data: {
@@ -118,12 +120,19 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
                 shiny: starter.shiny,
             })
 
-            const team = new TeamUser()
+            const team = new Team()
             await team.initTeam(User.id, pokemon.id)
 
-            let team_doc = await teamsModal.create({
+            await teamsModal.create({
                 owner_id: team.owner_id,
                 pokemons_id: team.pokemons_id,
+            })
+
+            const box = new Boxs()
+            await box.initBox(User.id)
+
+            await boxModal.create({
+                owner_id: box.owner_id
             })
 
             const helpEmbed = createHelpEmbed(pokemonName)

@@ -1,7 +1,4 @@
-/**
- * Class Pokemon
- */
-export class TeamUser {
+export class Team {
     owner_id: string
     pokemons_id: [string?, string?, string?, string?, string?, string?] = [];
 

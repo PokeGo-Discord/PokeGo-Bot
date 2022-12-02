@@ -3,6 +3,7 @@ import { Command } from '../Typings/Command'
 
 export default class Client extends Discord.Client {
     commands:Collection<String, Command> = new Collection();
+    guildCommands:Collection<String, Command> = new Collection();
 
     constructor(options: ClientOptions) {
         super(options)

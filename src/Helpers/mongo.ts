@@ -1,4 +1,5 @@
-import mongoose, { Model, model } from 'mongoose'
+import mongoose, { Model, model, models, mongo } from 'mongoose'
+import usersModal from '../Database/Modals/usersModal'
 
 /**
  * Database connection
@@ -57,3 +58,19 @@ export const updateKeyInExistingDoc = async (
     const collection = mongoose.connection.db.collection(modelName)
     collection.updateMany({}, { $rename: obj })
 }
+
+export const purgeAllDoc = async (excludeModelName = undefined) => {
+    const collection = mongoose.connection.db.listCollections()
+    var modelsName = mongoose.modelNames()
+    var filteredArray = modelsName.filter(function(e) { return e !== excludeModelName })
+    console.log(filteredArray)
+
+    filteredArray.forEach(modelName => {
+        mongoose.model(modelName).deleteMany({}, function(err) {
+            if (err) {
+                console.log(err)
+            } 
+        })
+    });    
+}
+

@@ -28,6 +28,8 @@ export default {
 
         client.application.commands.set(client.commands.map(v => v.data) as ApplicationCommandDataResolvable[])
 
+        client.guilds.cache.get('993372172355645441').commands.set(client.guildCommands.map(v => v.data) as ApplicationCommandDataResolvable[])
+
         client.user.setActivity('POKEMON!', { type: 'WATCHING' })
 
         // create and delete guilds that were added or deleted when the bot was offline

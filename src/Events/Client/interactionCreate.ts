@@ -13,7 +13,11 @@ export default {
 
         if(!interaction.isApplicationCommand()) return;
 
-        const command = client.commands.get(interaction.commandName)
+        let command = client.commands.get(interaction.commandName)
+
+        if(!command) {
+            command = client.guildCommands.get(interaction.commandName)
+        }
 
         if(!command) return interaction.reply({embeds: [
             new MessageEmbed()

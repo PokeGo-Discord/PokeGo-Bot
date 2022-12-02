@@ -20,6 +20,7 @@ export default {
 
         // Detect spam
         if (isSpamming(currentTime, cooldown_users, message.author.id)) return
+        console.log('slf');
 
         // Update lastMessageDate in db
         updateGuildLastMessageDate(message.guildId)
