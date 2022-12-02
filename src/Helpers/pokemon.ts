@@ -7,6 +7,8 @@ import { updateGuildLastSpawnDate } from '../Database/UtilsModals/UtilsGuilds'
 import { STATS_NAME, NATURE_MULTIPLIERS, NATURES, EMBED_COLOR} from './constants'
 import pokemonsModal, { Pokemons } from '../Database/Modals/pokemonsModal'
 import { BaseStatsType, getBaseStats, getSpecieName } from '../Api/PokemonApi'
+import { getTeamUser } from '../Database/UtilsModals/UtilsTeams'
+import { getBoxNotFull, getBoxsUser } from '../Database/UtilsModals/UtilsBoxs'
 
 export const pokemon_active: Record<string, boolean> = {}
 
@@ -176,7 +178,7 @@ export class Pokemon {
  * Spawn a pokemon to the guild.
  * @param guildId
  */
-export async function SpawningPokemon(guild: Guild, client: Client): Promise<void> {
+export async function SpawningPokemon(guild: Guild, client: Client) {
 
     pokemon_active[guild.id] = true;
 
@@ -189,6 +191,8 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
 
     const collector = await new InteractionCollector(client, {channel: channel, interactionType: 'APPLICATION_COMMAND', guild: channel.guild, time: 15000})
 
+    let userId = null
+    let interaction = null
 
     collector.on("collect", async (i: CommandInteraction) => {
         if(i.commandName != 'catch' || i.type != "APPLICATION_COMMAND") return
@@ -202,13 +206,13 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
         if(pokemon.name !== res) 
             return i.reply({ content: 'That is the wrong pokémon', ephemeral:true });
 
-        i.reply({ content:'That is the good pokémon', ephemeral: true})
-        channel.send(i.user.username + ' found the correct pokemon, it was ' + pokemon.name)
         pokemon.owner_id = await getUserId(i.user.id);
+        interaction = i
+        userId = i.user.id;
         collector.stop('finded')
     })
 
-    collector.on('end', (collected, reason) => {
+    collector.on('end', async (collected, reason)  => {
         pokemon_active[guild.id] = false;
         delete pokemon_active[guild.id];
 
@@ -216,15 +220,12 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
         message_count[guild.id] = 0;
         updateGuildLastSpawnDate(guild.id);
         
-        console.log(reason)
         if(reason == "time") {
             channel.send('Nobody find the correct answere')
             return;
         }
 
-        console.log(pokemon)
-
-        pokemonsModal.create({
+        const pokemonDb = await pokemonsModal.create({
             owner_id: pokemon.owner_id,
             pokemonId: pokemon.pokemonId,
             name: pokemon.name,
@@ -235,7 +236,22 @@ export async function SpawningPokemon(guild: Guild, client: Client): Promise<voi
             shiny: pokemon.shiny,
         })
 
+        channel.send(interaction.user.username + ' found the correct pokemon, it was ' + pokemon.name)
 
+        const teams = await getTeamUser(userId);
+        if(teams.pokemons_id.length < 6) {
+            teams.pokemons_id.push(pokemonDb.id)
+            teams.save()
+            return interaction.reply({ content:'That is the good pokémon, he was add to your team', ephemeral: true})
+        }
+
+        const box = await getBoxNotFull(userId)
+        if(!box) // TODO: ASK FOR REPLACE A POKEMON FROM THE BOX
+            return console.log("TODO: ASK for replace")
+        
+        interaction.reply({ content:'That is the good pokémon, he was add to your boxs', ephemeral: true})
+        box.pokemons_id.push(pokemonDb.id)
+        box.save()
     });
 
 }

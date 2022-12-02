@@ -7,6 +7,7 @@ import { createEmbedNoRegisted } from '../../Helpers/utils'
 import { EMBED_COLOR } from '../../Helpers/constants'
 import { getPokemonsUser } from '../../Database/UtilsModals/UtilsUsers'
 import { getBaseStats } from '../../Api/pokemonApi'
+import { getTeamUser } from '../../Database/UtilsModals/UtilsTeams'
 
 export default {
     data: {
@@ -28,6 +29,6 @@ export default {
         .setTitle('You are not registered!')
         .setDescription('Please do: ``/start`` and choose a starter pokemon!')
         
-        getBaseStats(1)
+        getTeamUser(interaction.user.id)
     }
 } as Command

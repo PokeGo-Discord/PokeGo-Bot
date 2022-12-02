@@ -32,9 +32,12 @@ export default {
      * @param {CommandInteraction} interaction
      */
     async execute(interaction: CommandInteraction, client: Client) {
+        // TODO: Check if the box lenght is less than 9
+        // TODO: Check if the team of the user have more than one pokemon
+        
         const boxsUser = await getBoxsUser(interaction.user.id)
         const teamUser = await getTeamUser(interaction.user.id)
-        boxsUser.pokemons_id.push(teamUser.pokemons_id[0])
-        boxsUser.save()
+        boxsUser[0].pokemons_id.push(teamUser.pokemons_id[0])
+        boxsUser[0].save()
     }
 } as Command
