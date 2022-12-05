@@ -37,7 +37,7 @@ export async function getPokemonData(pokemonId: number) {
 }
 
 export async function getBaseStats(pokemonId: number): Promise<BaseStatsType | string> {
-      const pokemonData = await getPokemonData(pokemonId)
+      const pokemonData: any = await getPokemonData(pokemonId)
 
       const baseStats: BaseStatsType = {
         hp: pokemonData.stats[0].base_stat,
@@ -52,7 +52,7 @@ export async function getBaseStats(pokemonId: number): Promise<BaseStatsType | s
 }
 
 export async function getSpecieName(pokemonId: number): Promise<string> {
-  const pokemonData = await getPokemonData(pokemonId)
+  const pokemonData: any = await getPokemonData(pokemonId)
 
   const specieName = pokemonData.species.name
   console.log(specieName)
@@ -75,7 +75,7 @@ export async function getAllPokemonName(offset: number) {
       throw new Error(`Error! status: ${response.status}`);
     }
 
-    const result = (await response.json());
+    const result: any = (await response.json());
 
     const pokemonName: string[] = []
     result.results.forEach(p => {

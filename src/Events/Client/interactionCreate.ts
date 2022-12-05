@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageEmbed } from 'discord.js'
+import { CommandInteraction, EmbedBuilder } from 'discord.js'
 import Client from '../../Extends/ExtendsClient'
 
 export default {
@@ -10,8 +10,7 @@ export default {
      * @param {CommandInteraction} interaction
      */
     execute(interaction: CommandInteraction, client: Client) {
-
-        if(!interaction.isApplicationCommand()) return;
+        if(!interaction.isCommand()) return;
 
         let command = client.commands.get(interaction.commandName)
 
@@ -20,8 +19,8 @@ export default {
         }
 
         if(!command) return interaction.reply({embeds: [
-            new MessageEmbed()
-            .setColor("RED")
+            new EmbedBuilder()
+            .setColor("Red")
             .setDescription("❌ An error occured while running this command.")
         ]}) && client.commands.delete(interaction.commandName) && client.application.commands.delete(interaction.commandName);
 

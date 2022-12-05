@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageEmbed, MessageActionRow, MessageSelectMenu, MessageSelectOptionData, MessageAttachment, Interaction, MessageButton, SelectMenuInteraction , Message} from 'discord.js'
+import { CommandInteraction, Interaction , Message, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuInteraction, ButtonBuilder, ButtonStyle, AttachmentBuilder, CacheType, EmbedBuilder, Embed, MessageSelectOption, APISelectMenuComponent, APISelectMenuOption, SelectMenuBuilder} from 'discord.js'
 import { Command } from '../../Typings/Command'
 import Client from '../../Extends/ExtendsClient'
 import { EMBED_COLOR, POKEMON_NORMAL_FILE_PATH } from '../../Helpers/constants'
@@ -10,14 +10,13 @@ import pokemonsModal from '../../Database/Modals/pokemonsModal'
 import teamsModal from '../../Database/Modals/teamsModal'
 import { getPathFile } from '../../Helpers/utils'
 import { getSpecieName } from '../../Api/PokemonApi'
-import { Boxs } from '../../Helpers/boxs'
 import boxModal from '../../Database/Modals/boxModal'
 
 export default {
     data: {
         name: "start",
+        type: 1,
         description: "Start your adventure and choose one starter",
-        options: []
     },
     /**
      * 
@@ -30,27 +29,27 @@ export default {
     }
 } as Command
 
-async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMenuInteraction = null) {
-    const row = new MessageActionRow()
+async function coreRecursive(interaction: CommandInteraction, iUpdate: StringSelectMenuInteraction = null) {
+    const row = new ActionRowBuilder<StringSelectMenuBuilder>()
             .addComponents(
-                new MessageSelectMenu()
+                new StringSelectMenuBuilder()
                     .setCustomId('select_starter')
                     .setPlaceholder('Choose a pokemon...')
                     .addOptions(action_row),
             );
         
-    const btn = new MessageActionRow()
+    const btn = new ActionRowBuilder<ButtonBuilder>()
             .addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                 .setCustomId('confirm_starter')
                 .setLabel('Confirm')
-                .setStyle('SUCCESS')
+                .setStyle(ButtonStyle.Success)
             )
             .addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                 .setCustomId('cancel_starter')
                 .setLabel('Cancel')
-                .setStyle('DANGER')
+                .setStyle(ButtonStyle.Danger)
             )
 
     if(iUpdate != null)
@@ -66,11 +65,10 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
 
     const filterSelect = (i: Interaction) => i.isSelectMenu() && i.customId === 'select_starter' && i.user.id === interaction.user.id;
     const collectorSelect = message.createMessageComponentCollector({ filter:filterSelect, time: 30000 });
-    collectorSelect.on('collect', async (i: SelectMenuInteraction) => {
-        console.log(i.id + ' RESPONS')
+    collectorSelect.on('collect', async (i: StringSelectMenuInteraction) => {
         pokemonId = i.values[0];
         const pokemonName = await getSpecieName(pokemonId)
-        const file = new MessageAttachment(getPathFile(pokemonName));
+        const file = new AttachmentBuilder(getPathFile(pokemonName));
         const selectPokemonEmbed = createEmbedSelectPokemon(pokemonName, file)
         await i.update({ embeds: [selectPokemonEmbed], files: [file], components: [btn] });
         collectorSelect.stop('selected')
@@ -88,18 +86,18 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
         const filterConfirm = (i: Interaction) => i.isButton() && i.customId === 'confirm_starter' && i.user.id === interaction.user.id;
         const collectorConfirm = message.createMessageComponentCollector({ filter:filterConfirm, time: 15000 });
 
-        collectorCancel.on('collect', async (i: SelectMenuInteraction) => {
+        collectorCancel.on('collect', async (i: StringSelectMenuInteraction) => {
             collectorCancel.stop()
             collectorConfirm.stop()
             coreRecursive(interaction, i);
         });
 
 
-        collectorConfirm.on('collect', async (i: SelectMenuInteraction) => {
+        collectorConfirm.on('collect', async (i: StringSelectMenuInteraction) => {
             collectorCancel.stop()
             collectorConfirm.stop()
 
-            if(await isUserExist(i.user.id)) return i.update({embeds: [createEmbedAlreadyRegisted()]});
+            if(await isUserExist(i.user.id)) return void (i.update({embeds: [createEmbedAlreadyRegisted()]}));
 
             let User = await usersModal.create({
                 userId: i.user.id,
@@ -127,12 +125,9 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
                 owner_id: team.owner_id,
                 pokemons_id: team.pokemons_id,
             })
-
-            const box = new Boxs()
-            await box.initBox(User.id)
-
+            
             await boxModal.create({
-                owner_id: box.ownerId
+                owner_id: User.id
             })
 
             const helpEmbed = createHelpEmbed(pokemonName)
@@ -160,34 +155,40 @@ async function coreRecursive(interaction: CommandInteraction, iUpdate: SelectMen
 /**
  * The first embed that is display with we do /start
  */
-const starterEmbed = new MessageEmbed()
+const starterEmbed = new EmbedBuilder()
     .setColor(EMBED_COLOR)
     .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
     .setTitle('Welcome to the world of Pokémon!')
     .setDescription('To begin play, choose one of these pokémon with the list at the end of this message!')
     .setImage('https://i.imgur.com/rKcIRCO.png')
-    .addField('Generation I', 'Bulbasaur | Charmander | Squirtle', false)
-    .addField('Generation II', 'Chikorita | Cyndaquil | Totodile', false)
-    .addField('Generation III', 'Treecko | Torchic | Mudkip', false)
-    .addField('Generation IV', 'Turtwig | Chimchar | Piplup', false)
-    .addField('Generation V', 'Snivy | Tepig | Oshawott', false)
-    .addField('Generation VI', 'Chespin | Fennekin | Froakie', false)
-    .addField('Generation VII', 'Rowlet | Litten | Popplio', false)
-    .addField('Generation VIII', 'Grookey | Scorbunny | Sobble', false)
+    .addFields([
+        {name: 'Generation I', value: 'Bulbasaur | Charmander | Squirtle'},
+        {name: 'Generation II', value: 'Chikorita | Cyndaquil | Totodile'},
+        {name: 'Generation III', value: 'Treecko | Torchic | Mudkip'},
+        {name: 'Generation IV', value: 'Turtwig | Chimchar | Piplup'},
+        {name: 'Generation V', value: 'Snivy | Tepig | Oshawott'},
+        {name: 'Generation VI', value: 'Chespin | Fennekin | Froakie'},
+        {name: 'Generation VII', value: 'Rowlet | Litten | Popplio'},
+        {name: 'Generation VIII', value: 'Grookey | Scorbunny | Sobble'},
+
+    ])
     .setFooter({ text: "Note: Trading in-game content for IRL money or using form of automation such as macros or selfbots to gain an unfair advantage will result in a ban (blacklist) from the bot. Don't cheat!"})
 
 
 /**
  * Information embed that is display when the user finish to pick a pokemon
  */
-export function createHelpEmbed(pokemonName: string): MessageEmbed {
-    const helpEmbed = new MessageEmbed()
+export function createHelpEmbed(pokemonName: string): EmbedBuilder {
+    const helpEmbed = new EmbedBuilder()
         .setColor(EMBED_COLOR)
         .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
         .setTitle('You got your first pokémon!')
         .setDescription('You can now catch pokémon and show off your Shinies and legendaries! I hope you will become the best pokemon trainer!')
-        .addField('Use ``/help``', 'To see the list of commands.', false)
-        .addField('Use ``/pokeinfo <pokemon>``', 'To see information about a pokemon\n_Example: ``/pokeinfo ' + pokemonName + '``_', false)
+        .addFields([
+            {name: 'Use ``/help``', value:'To see the list of commands.'},
+            {name: 'Use ``/pokeinfo <pokemon>``', value:'To see information about a pokemon\n_Example: ``/pokeinfo ' + pokemonName + '``_'},
+
+        ])
         .setFooter({ text: "Note: Trading in-game content for IRL money or using form of automation such as macros or selfbots to gain an unfair advantage will result in a ban (blacklist) from the bot. Don't cheat!"})
     return helpEmbed
 }
@@ -197,20 +198,22 @@ export function createHelpEmbed(pokemonName: string): MessageEmbed {
  * @param file
  * @returns MessageEmbed
  */
- export function createEmbedSelectPokemon(pokemonName: string, file: MessageAttachment): MessageEmbed {
+ export function createEmbedSelectPokemon(pokemonName: string, file: AttachmentBuilder): EmbedBuilder {
     const attachment_string = 'attachment://' + pokemonName + '.gif';
-    const selectedPokemonEmbed = new MessageEmbed()
+    const selectedPokemonEmbed = new EmbedBuilder()
         .setColor(EMBED_COLOR)
         .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
         .setTitle('You are about to choose ``' + pokemonName + '``!')
         .setImage(attachment_string)
-        .addField('\u200b', '\u200b', false)
+        .addFields([
+            {name:'\u200b', value:'\u200b'}
+        ])
 
     return selectedPokemonEmbed;
 }
 
- export function createEmbedAlreadyRegisted(): MessageEmbed {
-    const embedAlreadyRegisted = new MessageEmbed()
+ export function createEmbedAlreadyRegisted(): EmbedBuilder {
+    const embedAlreadyRegisted = new EmbedBuilder()
         .setColor(EMBED_COLOR)
         .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
         .setTitle('You are already registered!')
@@ -220,8 +223,8 @@ export function createHelpEmbed(pokemonName: string): MessageEmbed {
     return embedAlreadyRegisted;
 }
 
-export function createEmbedNoResponse(): MessageEmbed {
-    const embedNoResponse = new MessageEmbed()
+export function createEmbedNoResponse(): EmbedBuilder {
+    const embedNoResponse = new EmbedBuilder()
         .setColor(EMBED_COLOR)
         .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
         .setTitle('Are you still here?')
@@ -234,7 +237,7 @@ export function createEmbedNoResponse(): MessageEmbed {
 /**
  * The action_row that is display in the first embed to select a starter.
  */
-const action_row: MessageSelectOptionData[] = [
+const action_row: APISelectMenuOption[] = [
     {
         label: 'Bulbasaur',
         description: 'Generation I',

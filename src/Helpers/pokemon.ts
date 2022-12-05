@@ -1,5 +1,5 @@
 import Client from '../Extends/ExtendsClient'
-import { Guild, TextChannel, MessageEmbed, MessageAttachment, Message, InteractionCollector, CommandInteraction } from 'discord.js'
+import { Guild, TextChannel, Message, InteractionCollector, CommandInteraction, ApplicationCommand, CommandInteractionOptionResolver, InteractionType, AttachmentBuilder, EmbedBuilder } from 'discord.js'
 import { isSpawnDate, isGuildActive, getPathFile } from './utils'
 import { isUserExist, getUserId } from '../Database/UtilsModals/UtilsUsers'
 import { message_count } from '../Events/Client/messageCreate'
@@ -189,22 +189,22 @@ export async function SpawningPokemon(guild: Guild, client: Client) {
     const channel: TextChannel = client.channels.cache.get("993372173269999628") as TextChannel;
     await sendEmbedPokemon(channel, pokemon.name)
 
-    const collector = await new InteractionCollector(client, {channel: channel, interactionType: 'APPLICATION_COMMAND', guild: channel.guild, time: 15000})
+    const collector = await new InteractionCollector(client, {channel: channel, interactionType: InteractionType.ApplicationCommand, guild: channel.guild, time: 15000})
 
     let userId = null
     let interaction = null
 
     collector.on("collect", async (i: CommandInteraction) => {
-        if(i.commandName != 'catch' || i.type != "APPLICATION_COMMAND") return
+        if(i.commandName != 'catch' || !i.isCommand()) return
         
         const isRegistered = await isUserExist(i.user.id)
         if(!isRegistered)
-            return i.reply({ content: 'You are not registered, please do: ``/start`` and choose a starter pokemon!', ephemeral:true})
+            return void (i.reply({ content: 'You are not registered, please do: ``/start`` and choose a starter pokemon!', ephemeral:true}))
             
-        const { options } = i
+        const options = i.options as CommandInteractionOptionResolver
         const res = options.getString('pokemon');
         if(pokemon.name !== res) 
-            return i.reply({ content: 'That is the wrong pokémon', ephemeral:true });
+            return void (i.reply({ content: 'That is the wrong pokémon', ephemeral:true }));
 
         pokemon.owner_id = await getUserId(i.user.id);
         interaction = i
@@ -263,9 +263,9 @@ export async function SpawningPokemon(guild: Guild, client: Client) {
  * @returns Message boolean
  */
 export async function sendEmbedPokemon(channel: TextChannel, pokemonName: string): Promise<Message<boolean>> {
-    const file = new MessageAttachment(getPathFile(pokemonName));
+    const file = new AttachmentBuilder(getPathFile(pokemonName));
     const attachment_string = 'attachment://' + pokemonName + '.gif';
-    const pokemonEmbed = new MessageEmbed()
+    const pokemonEmbed = new EmbedBuilder()
         .setColor(EMBED_COLOR)
         .setTitle('A wild pokémon has appeared!')
         .setDescription('Guess the pokémon and type ``/catch <pokemon>`` to catch it!')

@@ -1,5 +1,5 @@
 import Client from '../../Extends/ExtendsClient'
-import { ApplicationCommandDataResolvable, Message } from 'discord.js'
+import { ActivityType, ApplicationCommandDataResolvable, Message } from 'discord.js'
 import * as pokemon from '../../Helpers/pokemon'
 import {
     createGuildDataOfflined,
@@ -30,7 +30,7 @@ export default {
 
         client.guilds.cache.get('993372172355645441').commands.set(client.guildCommands.map(v => v.data) as ApplicationCommandDataResolvable[])
 
-        client.user.setActivity('POKEMON!', { type: 'WATCHING' })
+        client.user.setActivity('POKEMON!', { type: ActivityType.Watching })
 
         // create and delete guilds that were added or deleted when the bot was offline
         createGuildDataOfflined(client)

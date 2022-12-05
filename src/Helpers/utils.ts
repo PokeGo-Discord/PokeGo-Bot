@@ -1,4 +1,4 @@
-import { Guild, MessageEmbed } from 'discord.js'
+import { Embed, EmbedBuilder, Guild } from 'discord.js'
 import {
     getGuildLastMessageDate,
     getGuildLastSpawnDate,
@@ -95,8 +95,8 @@ export async function isSpawnDate(guildId: string): Promise<boolean> {
     return true
 }
 
-export function createEmbedNoRegisted(): MessageEmbed {
-    const embedAlreadyRegisted = new MessageEmbed()
+export function createEmbedNoRegisted(): EmbedBuilder {
+    const embedAlreadyRegisted = new EmbedBuilder()
         .setColor(EMBED_COLOR)
         .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
         .setTitle('You are not registered!')
@@ -124,3 +124,4 @@ export function getPathFile(pokemonName: string, shiny = false): string {
 export function DebugLog(log: string): void {
     if (process.env.environment === 'debug') console.log('DEBUG: ' + log + '\n')
 }
+

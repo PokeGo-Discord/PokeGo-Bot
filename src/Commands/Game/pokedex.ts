@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageEmbed, MessageActionRow, MessageButton, Interaction, Message, SelectMenuInteraction } from 'discord.js'
+import { CommandInteraction, Interaction, Message, SelectMenuInteraction, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js'
 import { Command } from '../../Typings/Command'
 import Client from '../../Extends/ExtendsClient'
 import { getOnlyNamePokemonsUser } from '../../Database/UtilsModals/UtilsUsers'
@@ -13,7 +13,7 @@ export default {
             {
                 name: "pokemon",
                 description: "Give the name or the number of a pokemon to get more information about him from the pokedex.",
-                type: "STRING",
+                type: 3,
                 required: false,   
             }
         ]
@@ -40,7 +40,7 @@ async function displayPokedex(interaction: CommandInteraction, page: number, iUp
     const p = (20 * page)
     const slicedPokemon = await getAllPokemonName(p) as string[];
     const pokeballEmoji = interaction.client.emojis.cache.get("1008496323768631318");
-    const pokedexEmbed = new MessageEmbed()
+    const pokedexEmbed = new EmbedBuilder()
     .setColor(EMBED_COLOR)
     .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
     .setTitle(`${interaction.user.username} Pokedex`)
@@ -58,18 +58,18 @@ async function displayPokedex(interaction: CommandInteraction, page: number, iUp
     });
     pokedexEmbed.setDescription(str)
 
-    const btn = new MessageActionRow()
+    const btn = new ActionRowBuilder<ButtonBuilder>()
     .addComponents(
-        new MessageButton()
+        new ButtonBuilder()
         .setCustomId('previous_page')
         .setLabel('◀️')
-        .setStyle('PRIMARY')
+        .setStyle(ButtonStyle.Primary)
     )
     .addComponents(
-        new MessageButton()
+        new ButtonBuilder()
         .setCustomId('next_page')
         .setLabel('▶️')
-        .setStyle('PRIMARY')
+        .setStyle(ButtonStyle.Primary)
     )
     if(iUpdate != null)
         await iUpdate.update({ embeds: [pokedexEmbed], components: [btn] })

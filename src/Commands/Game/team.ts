@@ -1,4 +1,4 @@
-import { CommandInteraction, EmbedBuilder } from 'discord.js'
+import { CommandInteraction } from 'discord.js'
 import { Command } from '../../Typings/Command'
 import Client from '../../Extends/ExtendsClient'
 import { pokemon_active } from '../../Helpers/pokemon'
@@ -11,9 +11,10 @@ import { getTeamUser } from '../../Database/UtilsModals/UtilsTeams'
 
 export default {
     data: {
-        name: "info",
+        name: "team",
         type: 1,
-        description: "Display information about your selected pokemon",
+        description: "Show your team",
+        options: []
     },
     /**
      * 
@@ -23,12 +24,6 @@ export default {
     async execute(interaction: CommandInteraction, client: Client) {
         if(await !isUserExist(interaction.user.id)) return interaction.reply({embeds: [createEmbedNoRegisted()], ephemeral: true});
 
-        const statsEmbed = new EmbedBuilder()
-        .setColor(EMBED_COLOR)
-        .setAuthor({ name: 'Professor Oak', iconURL: 'https://images-ext-1.discordapp.net/external/tFaY5PqVp5Vyo5B3K7-Cpcrl_o-liWtFddFclOSB0V0/https/i.imgflip.com/13l2aq.jpg' })
-        .setTitle('You are not registered!')
-        .setDescription('Please do: ``/start`` and choose a starter pokemon!')
-        
         getTeamUser(interaction.user.id)
     }
 } as Command

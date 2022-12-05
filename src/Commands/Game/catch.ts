@@ -7,11 +7,12 @@ export default {
     data: {
         name: "catch",
         description: "Catch a pokemon",
+        type: 1,
         options: [
             {
                 name: "pokemon",
                 description: "Give the name of the pokemon",
-                type: "STRING",
+                type: 3,
                 required: true,
             }
         ]
